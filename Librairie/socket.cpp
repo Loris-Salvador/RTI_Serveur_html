@@ -22,7 +22,7 @@ int ServerSocket(int port)
     memset(&hints,0,sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV; // pour une connexion passive
+    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV | AI_NUMERICHOST; // pour une connexion passive
 
     char port_str[10];
     sprintf(port_str, "%d", port);
@@ -33,6 +33,7 @@ int ServerSocket(int port)
         close(s);
         exit(1);
     }
+
 
     if (bind(s,results->ai_addr,results->ai_addrlen) < 0)
     {
@@ -50,24 +51,20 @@ int Accept(int sEcoute,char *ipClient)
         exit(1);
     }
 
-    struct sockaddr *addr;
+    struct sockaddr adrClient;
+    socklen_t adrClientLen = sizeof(adrClient); // Initialisation de la taille
+
     int sService;
 
-    if((sService = accept(sEcoute, NULL, NULL)) == -1)
-    {
-        perror("Erreur accpet");
+    if ((sService = accept(sEcoute, &adrClient, &adrClientLen)) == -1) {
+        perror("Erreur accept");
         exit(1);
     }
 
-    char port[NI_MAXSERV];
-    char host[NI_MAXHOST];
 
-    struct sockaddr_in adrClient;
-    socklen_t adrClientLen;
-    getpeername(sService,(struct sockaddr*)&adrClient,&adrClientLen);
-    getnameinfo((struct 
-    sockaddr*)&adrClient,adrClientLen,ipClient,NI_MAXHOST,port,NI_MAXSERV,NI_NUMERICSERV | 
-    NI_NUMERICHOST);
+    char port[NI_MAXSERV];
+    
+    getnameinfo(&adrClient,adrClientLen,ipClient,NI_MAXHOST,port,NI_MAXSERV,NI_NUMERICSERV | NI_NUMERICHOST);
     printf("Client connecte --> Adresse IP: %s\n",ipClient);
 
     return sService;

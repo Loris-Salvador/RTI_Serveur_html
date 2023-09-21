@@ -18,7 +18,7 @@ int main()
     printf("Socket : %d\n", s);
 
     int sService;
-    char ipClient[NI_MAXHOST]; // Allouez suffisamment de mémoire pour stocker l'adresse IP
+    char *ipClient;
 
     sService = Accept(s, ipClient);
 
