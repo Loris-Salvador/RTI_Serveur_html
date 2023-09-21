@@ -1,4 +1,5 @@
 #include "windowclient.h"
+#include "../Librairie/socket.h"
 
 #include <QApplication>
 

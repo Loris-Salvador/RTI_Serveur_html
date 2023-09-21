@@ -2,6 +2,7 @@
 #include "ui_windowclient.h"
 #include <QMessageBox>
 #include <string>
+#include "../Librairie/socket.h"
 using namespace std;
 
 extern WindowClient *w;
