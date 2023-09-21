@@ -19,5 +19,13 @@ int main()
     sClient = ClientSocket(ipServeur, 1084);
 
 
+    char data[100];
+
+    strcpy(data, "potty le bot");
+
+
+    Send(sClient, data, strlen(data));
+
+
     return 0;
 }

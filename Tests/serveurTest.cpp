@@ -27,6 +27,12 @@ int main()
 
     printf("ipClient : %s\n", ipClient);
 
+    char data[200];
+
+    Receive(sService,data);
+
+    printf("\n\ndata lu : %s", data);
+
 
     return 0;
 }
