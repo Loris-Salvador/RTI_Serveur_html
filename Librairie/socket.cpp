@@ -22,7 +22,7 @@ int ServerSocket(int port)
     memset(&hints,0,sizeof(struct addrinfo));
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV | AI_NUMERICHOST; // pour une connexion passive
+    hints.ai_flags = AI_PASSIVE | AI_NUMERICSERV; // pour une connexion passive
 
     char port_str[10];
     sprintf(port_str, "%d", port);

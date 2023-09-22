@@ -16,7 +16,7 @@ int main()
     strcpy(ipServeur, "192.168.203.128");
 
 
-    sClient = ClientSocket(ipServeur, 1084);
+    sClient = ClientSocket(ipServeur, 1056);
 
 
     char data[100];

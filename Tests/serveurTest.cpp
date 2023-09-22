@@ -13,7 +13,7 @@ int main()
 
     int s;
 
-    s = ServerSocket(1084);
+    s = ServerSocket(1024);
 
     printf("Socket : %d\n", s);
 
