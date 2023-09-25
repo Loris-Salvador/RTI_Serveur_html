@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <string>
 #include "../Librairie/socket.h"
+#include "../Librairie/convention.h"
 using namespace std;
 
 extern WindowClient *w;
@@ -276,12 +277,23 @@ void WindowClient::on_pushButtonLogin_clicked()
 {
   const char *user = getNom();
   const char *password = getMotDePasse();
-  bool newClient = isNouveauClientChecked();
+  bool isNewClient = isNouveauClientChecked();
 
-  
+  char requete[200];
+
+  LoginRequestToString(user, password, isNewClient, requete);
 
 
+  int sClient;
+  char ipServeur[20];
 
+  strcpy(ipServeur, IP_SERVEUR);
+
+
+  sClient = ClientSocket(ipServeur, PORT_SERVEUR);
+
+
+  Send(sClient, requete, strlen(requete));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

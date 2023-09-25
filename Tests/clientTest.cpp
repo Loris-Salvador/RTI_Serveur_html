@@ -21,10 +21,17 @@ int main()
 
     char data[100];
 
-    strcpy(data, "potty le bot");
+    strcpy(data, "ACHAT#1#1");
 
 
     Send(sClient, data, strlen(data));
+
+    char reponse[200];
+
+    Receive(sClient, reponse);
+
+
+    printf("Reponse : %s", reponse);
 
 
 

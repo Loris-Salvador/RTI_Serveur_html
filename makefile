@@ -2,9 +2,16 @@
 
 
 
-all:	./ClientQt/mainclient.o ./ClientQt/windowclient.o ./ClientQt/moc_windowclient.o ./Librairie/socket.o
-		g++ -Wno-unused-parameter -o ./ClientQt/Client ./ClientQt/mainclient.o ./ClientQt/windowclient.o ./Librairie/socket.o ./ClientQt/moc_windowclient.o /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Core.so /usr/lib64/libGL.so -lpthread
-		g++ -o ./Serveur/Serveur ./Serveur/Serveur.cpp ./Librairie/socket.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient
+all:	./ClientQt/mainclient.o ./ClientQt/windowclient.o ./ClientQt/moc_windowclient.o ./Librairie/socket.o ./Librairie/convention.o ./Serveur/OVESP.o
+		g++ -Wno-unused-parameter -o ./ClientQt/Client ./ClientQt/mainclient.o ./ClientQt/windowclient.o ./Librairie/socket.o ./Librairie/convention.o ./ClientQt/moc_windowclient.o /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Core.so /usr/lib64/libGL.so -lpthread
+		g++ -o ./Serveur/Serveur ./Serveur/Serveur.cpp ./Librairie/socket.o ./Serveur/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient
+
+
+./Serveur/OVESP.o:	./Serveur/OVESP.cpp
+	g++ -c ./Serveur/OVESP.cpp -o ./Serveur/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient -lz -lm -lrt -lssl -lcrypto -ldl
+
+./Libraire/convention.o:	./Librairie/convention.cpp
+	g++ -c ./Librairie/convention.cpp -o ./Librairie/convention.o
 
 ./Librairie/socket.o:	./Librairie/socket.h	./Librairie/socket.cpp
 	g++ -c ./Librairie/socket.cpp -o ./Librairie/socket.o

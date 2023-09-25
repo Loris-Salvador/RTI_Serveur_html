@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include "../Librairie/socket.h"
+#include "OVESP.h"
 #include <mysql.h>
 //#include "SMOP.h"
 
@@ -12,16 +13,6 @@
 #define NB_ARTICLE_MAX 10
 
 
-
-
-typedef struct
-{
-  int   id;
-  char  intitule[20];
-  float prix;
-  int   stock;  
-  char  image[20];
-} ARTICLE;
 
 
 void HandlerSIGINT(int s);
@@ -188,7 +179,7 @@ void TraitementConnexion(int sService)
 
     requete[nbLus] = 0;
     printf("\t[THREAD %p] Requete recue = %s\n",pthread_self(),requete);
-    //onContinue = OVESP(requete,reponse,sService, &panier, connexion);
+    onContinue = OVESP(requete,reponse,sService, panier, connexion);
 
 
 
