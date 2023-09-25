@@ -21,7 +21,7 @@ int main()
 
     char data[100];
 
-    strcpy(data, "ACHAT#1#1");
+    strcpy(data, "ACHAT#7#1");
 
 
     Send(sClient, data, strlen(data));

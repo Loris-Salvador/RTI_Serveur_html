@@ -134,6 +134,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
             exit(1);
         }
 
+
         if((resultat = mysql_store_result(connexion))==NULL)
         {
             fprintf(stderr, "Erreur de mysql_store_result: %s\n",mysql_error(connexion));
@@ -159,18 +160,13 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
                     exit(1);
                 }
 
-                sprintf(reponse,"ACHAT#%s#%s#%s",ligne[0],quantite,ligne[2]);
-
-                puts("to");
+                sprintf(reponse,"ACHAT#%s#%d#%s",ligne[0],quantite,ligne[2]);
 
                 int i;
                 for (i = 0; caddie[i] != NULL && i<10; i++);
 
-                puts("to1");
-
                 if(caddie[i] != NULL && i<10)//Vérification inutile mais on sait jamais
                 {
-                    puts("to3");
                     caddie[i] = (ARTICLE *)malloc(sizeof(ARTICLE));
                 }
 
