@@ -1,5 +1,5 @@
-#ifndef TCP_H
-#define TCP_H
+#ifndef SOCKET_H
+#define SOCKET_H
 #define TAILLE_MAX_DATA 10000
 
 

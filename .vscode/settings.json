@@ -10,7 +10,9 @@
   ],
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.includePaths": [
-    "/usr/include/mysql"
+    "/usr/include/mysql",
+    "/usr/include/qt5/QtWidgets",
+    "/usr/include/qt5"
   ],
   "C_Cpp_Runner.linkerArgs": [],
   "C_Cpp_Runner.cStandard": "",
