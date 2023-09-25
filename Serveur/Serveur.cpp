@@ -5,7 +5,23 @@
 #include <signal.h>
 #include <pthread.h>
 #include "../Librairie/socket.h"
+#include <mysql.h>
 //#include "SMOP.h"
+
+
+#define NB_ARTICLE_MAX 10
+
+
+
+
+typedef struct
+{
+  int   id;
+  char  intitule[20];
+  float prix;
+  int   stock;  
+  char  image[20];
+} ARTICLE;
 
 
 void HandlerSIGINT(int s);
@@ -13,9 +29,12 @@ void TraitementConnexion(int sService);
 void* FctThreadClient(void* p);
 int sEcoute;
 
+MYSQL* connexion;
+
+
 
 #define NB_THREADS_POOL 2
-#define TAILLE_FILE_ATTENTE 0
+#define TAILLE_FILE_ATTENTE 20
 int socketsAcceptees[TAILLE_FILE_ATTENTE];
 int indiceEcriture=0, indiceLecture=0;
 pthread_mutex_t mutexSocketsAcceptees;
@@ -61,6 +80,16 @@ int main(int argc,char* argv[])
 
   for (int i=0 ; i<NB_THREADS_POOL ; i++)
     pthread_create(&th,NULL,FctThreadClient,NULL);
+
+
+  //CONNEXION DB
+
+  connexion = mysql_init(NULL);
+  if(mysql_real_connect(connexion,"localhost","Student","PassStudent1_","PourStudent",0,0,0) == NULL)
+  {
+    fprintf(stderr,"(SERVEUR) Erreur de connexion à la base de données...\n");
+    exit(1);  
+  }
 
 
   int sService;
@@ -120,20 +149,23 @@ void* FctThreadClient(void* p)
 }
 void HandlerSIGINT(int s)
 {
- printf("\nArret du serveur.\n");
- close(sEcoute);
- pthread_mutex_lock(&mutexSocketsAcceptees);
- for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
- if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
- pthread_mutex_unlock(&mutexSocketsAcceptees);
- //SMOP_Close();
- exit(0);
+  printf("\nArret du serveur.\n");
+  close(sEcoute);
+  pthread_mutex_lock(&mutexSocketsAcceptees);
+  for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
+  if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
+  pthread_mutex_unlock(&mutexSocketsAcceptees);
+  //SMOP_Close();
+  exit(0);
 }
 void TraitementConnexion(int sService)
 {
   char requete[200], reponse[200];
   int nbLus, nbEcrits;
   bool onContinue = true;
+
+  ARTICLE* panier[NB_ARTICLE_MAX];
+
 
 
   while (onContinue)
@@ -156,23 +188,18 @@ void TraitementConnexion(int sService)
 
     requete[nbLus] = 0;
     printf("\t[THREAD %p] Requete recue = %s\n",pthread_self(),requete);
-    //onContinue = SMOP(requete,reponse,sService);
-
-    ////////////////
-    strcpy(reponse, "reponse ok ! ");
-    onContinue = Send(sService, reponse, strlen(reponse));
-    onContinue = false;
-    /////////////////
+    //onContinue = OVESP(requete,reponse,sService, &panier, connexion);
 
 
-    // if ((nbEcrits = Send(sService,reponse,strlen(reponse))) < 0)
-    // {
-    //   perror("Erreur de Send");
-    //   close(sService);
-    //   HandlerSIGINT(0);
-    // }
 
-    // printf("\t[THREAD %p] Reponse envoyee = %s\n",pthread_self(),reponse);
+    if ((nbEcrits = Send(sService,reponse,strlen(reponse))) < 0)
+    {
+      perror("Erreur de Send");
+      close(sService);
+      HandlerSIGINT(0);
+    }
+
+    printf("\t[THREAD %p] Reponse envoyee = %s\n",pthread_self(),reponse);
     if (!onContinue) 
       printf("\t[THREAD %p] Fin de connexion de la socket %d\n",pthread_self(),sService);
   }
