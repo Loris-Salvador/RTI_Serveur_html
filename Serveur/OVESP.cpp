@@ -9,9 +9,9 @@
 
 
 
-//bool is_Log_In_BD(char* user);
-//bool OVESP_Login(char* user, char* password);
-//void add_Client_In_BD(char* user, char* password);
+bool is_Log_In_BD(char* user, MYSQL* connexion);
+bool OVESP_Login(char* user, char* password, MYSQL* connexion);
+void add_Client_In_BD(char* user, char* password, MYSQL* connexion);
 
 void OVESP_Consult(int idArticle, ARTICLE* art);
 
@@ -27,9 +27,7 @@ int OVESP_Confirmer();
 
 void OVESP_Logout();
 
-MYSQL_ROW ligne;
-char requete_sql[200];
-MYSQL_RES  *resultat;
+
 ARTICLE ** caddie;
 
 
@@ -37,6 +35,10 @@ ARTICLE ** caddie;
 //***** Parsing de la requete et creation de la reponse *************
 bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* connexion)
 {
+
+    MYSQL_ROW ligne;
+    char requete_sql[200];
+    MYSQL_RES  *resultat;
 
     caddie = cadd;
     // ***** Récupération nom de la requete *****************
@@ -50,48 +52,42 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
         strcpy(user,strtok(NULL,"#"));
         strcpy(password,strtok(NULL,"#"));
 
-        if(strcmp("Potty",user)==0 && strcmp("Antoine",password)==0)
-            sprintf(reponse,"LOGIN#OK#Client Log");
-        else
+        printf("\n\npassword : %s", password);
+
+        int newclient = atoi(strtok(NULL,"#"));
+
+        printf("\n\npassword : %s", password);
+
+        
+        printf("\t[THREAD %p] LOGIN de %s\n",pthread_self(),user);
+        
+        if(!newclient) // Client existant dans la BD
+        {
+            if (OVESP_Login(user,password, connexion))
+            {
+                sprintf(reponse,"LOGIN#OK#Client Log");
+            } 
+            else
+            {
+                if(is_Log_In_BD(user, connexion))
+                    sprintf(reponse,"LOGIN#BAD#Mauvais mot de passe !");
+                else
+                    sprintf(reponse,"LOGIN#BAD#Client n'existe pas !");
+
+                return false;
+            }
+        }
+        else if (!is_Log_In_BD(user, connexion)) // New Client qui n'est pas dejà dans la BD
+        {
+            add_Client_In_BD(user, password, connexion);
+            sprintf(reponse,"LOGIN#OK#Nouveau Client");
+        }
+        else // Ce "user" est déjà utilisé
             return false;
-    }
-
-    //     char user[50], password[50], myBool;
-        
-    //     strcpy(user,strtok(NULL,"#"));
-    //     strcpy(password,strtok(NULL,"#"));
-
-    //     int newclient = atoi(strcpy(password,strtok(NULL,"#")));
-        
-    //     printf("\t[THREAD %p] LOGIN de %s\n",pthread_self(),user);
-        
-    //     if(!newclient) // Client existant dans la BD
-    //     {
-    //         if (OVESP_Login(user,password))
-    //         {
-    //             sprintf(reponse,"LOGIN#OK#Client Log");
-    //         } 
-    //         else
-    //         {
-    //             if(is_Log_In_BD(user))
-    //                 sprintf(reponse,"LOGIN#BAD#Mauvais mot de passe !");
-    //             else
-    //                 sprintf(reponse,"LOGIN#BAD#Client n'existe pas !");
-
-    //             return false;
-    //         }
-    //     }
-    //     else if (!is_Log_In_BD(user)) // New Client qui n'est pas dejà dans la BD
-    //     {
-    //         add_Client_In_BD(user, password);
-    //         sprintf(reponse,"LOGIN#OK#Nouveau Client");
-    //     }
-    //     else // Ce "user" est déjà utilisé
-    //         return false;
-    // }
     
+    }
     // ***** LOGOUT *****************************************
-    if (strcmp(ptr,"LOGOUT") == 0)
+    else if (strcmp(ptr,"LOGOUT") == 0)
     {
         printf("\t[THREAD %p] LOGOUT\n",pthread_self());
         sprintf(reponse,"LOGOUT#OK");
@@ -252,6 +248,12 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
 bool OVESP_Cancel(int idArticle, MYSQL* connexion)
 {
+
+    MYSQL_ROW ligne;
+    char requete_sql[200];
+    MYSQL_RES  *resultat;
+
+
     sprintf(requete_sql,"select * from ARTICLE");
         
     if(mysql_query(connexion,requete_sql) != 0)
@@ -291,4 +293,107 @@ bool OVESP_Cancel(int idArticle, MYSQL* connexion)
     }
     else
         return false;
+}
+
+
+
+bool is_Log_In_BD(char* user, MYSQL* connexion)
+{
+    MYSQL_ROW ligne;
+    char requete_sql[200];
+    MYSQL_RES  *resultat;
+
+    sprintf(requete_sql, "SELECT * FROM USER WHERE USERNAME LIKE '%s'", user);
+
+        
+    if(mysql_query(connexion,requete_sql) != 0)
+    {
+        fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+        return false;
+    }
+
+
+    if((resultat = mysql_store_result(connexion))==NULL)
+    {
+        fprintf(stderr, "Erreur de mysql_store_result: %s\n",mysql_error(connexion));
+        return false;
+    }
+
+
+    ligne = mysql_fetch_row(resultat);
+
+    if(ligne == NULL)
+    {
+        return false;
+    }
+
+    char user_bd[200];
+
+    strcpy(user_bd, ligne[0]);
+
+    if(strcmp(user_bd, user)==0)
+    {
+        return true;
+    }
+
+
+    return false;
+}
+bool OVESP_Login(char* user, char* password, MYSQL* connexion)
+{
+    MYSQL_ROW ligne;
+    char requete_sql[200];
+    MYSQL_RES  *resultat;
+    char password_bd[200];
+
+
+    sprintf(requete_sql, "SELECT * FROM USER WHERE USERNAME LIKE '%s'", user);
+
+        
+    if(mysql_query(connexion,requete_sql) != 0)
+    {
+        fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+        return false;
+    }
+
+
+    if((resultat = mysql_store_result(connexion))==NULL)
+    {
+        fprintf(stderr, "Erreur de mysql_store_result: %s\n",mysql_error(connexion));
+        return false;
+    }
+
+
+    ligne = mysql_fetch_row(resultat);
+
+    if(ligne == NULL)
+    {
+        return false;
+    }
+
+    printf("\n ligne 1 : %s\n", ligne[1]);
+    puts(password);
+
+    strcpy(password_bd, ligne[1]);
+
+    if(strcmp(password_bd, password)==0)
+    {
+        return true;
+    }
+
+
+    return false;
+}
+
+void add_Client_In_BD(char* user, char* password, MYSQL* connexion)
+{
+    char requete_sql[200];
+
+    sprintf(requete_sql, "INSERT INTO USER VALUES ('%s', '%s')", user, password);
+
+        
+    if(mysql_query(connexion,requete_sql) != 0)
+    {
+        fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+    }
 }

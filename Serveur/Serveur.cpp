@@ -188,12 +188,16 @@ void TraitementConnexion(int sService)
     }
 
     printf("\t[THREAD %p] Reponse envoyee = %s\n",pthread_self(),reponse);
-    if (!onContinue)
+    // if (!onContinue)
+    // {
+    //   strcpy(requete, "CANCEL ALL");
+    //   OVESP(requete, reponse, sService, panier, connexion);
+    //   free(panier);
+    //   printf("\t[THREAD %p] Fin de connexion de la socket %d\n",pthread_self(),sService);
+    // }
+    if(!onContinue)
     {
-      strcpy(requete, "CANCEL ALL");
-      OVESP(requete, reponse, sService, panier, connexion);
-      free(panier);
-      printf("\t[THREAD %p] Fin de connexion de la socket %d\n",pthread_self(),sService);
+      close(sService);
     }
   }
 }

@@ -33,3 +33,5 @@ clean:
 clobber:
 	rm ./ClientQt/Client
 	rm ./Serveur/Serveur
+	rm ./ClientQt/*o
+	rm ./Librairie/*o

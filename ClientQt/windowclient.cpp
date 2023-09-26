@@ -4,6 +4,7 @@
 #include <string>
 #include "../Librairie/socket.h"
 #include "../Librairie/convention.h"
+
 using namespace std;
 
 extern WindowClient *w;
@@ -310,6 +311,7 @@ void WindowClient::on_pushButtonLogin_clicked()
     else if (strcmp(etat,"BAD") == 0)
     {
       dialogueErreur("LOGIN",message);
+      return;//bot???
     }
     else//Normalement pas besoin
       dialogueErreur(ptr,message);

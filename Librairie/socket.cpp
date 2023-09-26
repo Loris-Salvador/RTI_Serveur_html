@@ -113,14 +113,15 @@ int Send(int sSocket,char* data,int taille)
     if (taille > TAILLE_MAX_DATA)
         return -1;
 
-    char trame[TAILLE_MAX_DATA+2];
+    char trame[TAILLE_MAX_DATA+3];
     memcpy(trame,data,taille);
-    trame[taille] = '<';
-    trame[taille+1] = '}';
+    trame[taille] = '\0';
+    trame[taille+1] = '<';
+    trame[taille+2] = '}';
 
 
 
-    return write(sSocket,trame,taille+2)-2;
+    return write(sSocket,trame,taille+3)-3;
 
 }
 int Receive(int sSocket,char* data)
