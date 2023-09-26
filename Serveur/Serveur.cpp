@@ -7,7 +7,6 @@
 #include "../Librairie/socket.h"
 #include "OVESP.h"
 #include <mysql.h>
-//#include "SMOP.h"
 
 
 #define NB_ARTICLE_MAX 10
@@ -76,7 +75,7 @@ int main(int argc,char* argv[])
   //CONNEXION DB
 
   connexion = mysql_init(NULL);
-  if(mysql_real_connect(connexion,"localhost","Student","PassStudent1_","PourStudent",0,0,0) == NULL)
+  if(mysql_real_connect(connexion,"192.168.203.1","LA","LA","PSLA_RTI",0,0,0) == NULL)
   {
     fprintf(stderr,"(SERVEUR) Erreur de connexion à la base de données...\n");
     exit(1);  
@@ -155,9 +154,7 @@ void TraitementConnexion(int sService)
   int nbLus, nbEcrits;
   bool onContinue = true;
 
-  ARTICLE* panier[NB_ARTICLE_MAX];
-
-
+  ARTICLE** panier= (ARTICLE**)malloc(sizeof(ARTICLE*) * 10);
 
   while (onContinue)
   {
@@ -191,7 +188,12 @@ void TraitementConnexion(int sService)
     }
 
     printf("\t[THREAD %p] Reponse envoyee = %s\n",pthread_self(),reponse);
-    if (!onContinue) 
+    if (!onContinue)
+    {
+      strcpy(requete, "CANCEL ALL");
+      OVESP(requete, reponse, sService, panier, connexion);
+      free(panier);
       printf("\t[THREAD %p] Fin de connexion de la socket %d\n",pthread_self(),sService);
+    }
   }
 }

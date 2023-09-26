@@ -1,17 +1,10 @@
 #include "convention.h"
 #include <string.h>
+#include <cstdio>
 
 
-void LoginRequestToString(const char* user, const char* password, bool isNewClient, char* requete)
+void LoginRequestToString(char* myString, const char* user, const char* password, bool isNewClient)
 {
-    strcpy(requete, LOGIN);
-    strcat(requete, CS);
-    strcat(requete, user);
-    strcat(requete, CS);
-    strcat(requete, password);
-    strcat(requete, CS);
-    if(isNewClient)
-        strcat(requete, "1");
-    else
-        strcat(requete, "0");
+    sprintf(myString, "%s%s%s%s%s%s%d", LOGIN, CS, user, CS, password, CS, isNewClient);
 }
+

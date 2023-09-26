@@ -43,8 +43,19 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
     char *ptr = strtok(requete,"#");
 
     // ***** LOGIN ******************************************
-    // if (strcmp(ptr,"LOGIN") == 0) 
-    // {
+    if (strcmp(ptr,"LOGIN") == 0) 
+    {
+        char user[50], password[50];
+
+        strcpy(user,strtok(NULL,"#"));
+        strcpy(password,strtok(NULL,"#"));
+
+        if(strcmp("Potty",user)==0 && strcmp("Antoine",password)==0)
+            sprintf(reponse,"LOGIN#OK#Client Log");
+        else
+            return false;
+    }
+
     //     char user[50], password[50], myBool;
         
     //     strcpy(user,strtok(NULL,"#"));
@@ -93,7 +104,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
         printf("\t[THREAD %p] CONSULT\n",pthread_self());
         // Acces BD
-        sprintf(requete_sql,"select * from UNIX_FINAL");
+        sprintf(requete_sql,"select * from ARTICLE");
 
         int idArticle = atoi(strtok(NULL,"#"));
         
@@ -126,7 +137,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
     {
         printf("\t[THREAD %p] ACHAT\n",pthread_self());
 
-        sprintf(requete_sql,"select * from UNIX_FINAL");
+        sprintf(requete_sql,"select * from ARTICLE");
         
         if(mysql_query(connexion,requete_sql) != 0)
         {
@@ -152,7 +163,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
             if(quantite<=stock)
             {
-                sprintf(requete_sql,"update UNIX_FINAL set stock=%d where id=%d", stock-quantite, atoi(ligne[0]));
+                sprintf(requete_sql,"update ARTICLE set stock=%d where id=%d", stock-quantite, atoi(ligne[0]));
                  
                 if(mysql_query(connexion,requete_sql) != 0)
                 {
@@ -160,14 +171,26 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
                     exit(1);
                 }
 
-                sprintf(reponse,"ACHAT#%s#%d#%s",ligne[0],quantite,ligne[2]);
+                sprintf(reponse,"ACHAT#%s#%d#%s#%s",ligne[0],quantite,ligne[1],ligne[2]);
+
+                ARTICLE art;
+
+                art.id = atoi(ligne[0]);
+                strcpy(art.intitule, ligne[1]);
+                art.stock = quantite;
+                strcpy(art.image, ligne[4]);
+                art.prix = atof(ligne[2]);
+
+                printf("art: %f\n", art.prix);
 
                 int i;
                 for (i = 0; caddie[i] != NULL && i<10; i++);
 
-                if(caddie[i] != NULL && i<10)//Vérification inutile mais on sait jamais
+                if(caddie[i] == NULL && i<10)//Vérification inutile mais on sait jamais
                 {
                     caddie[i] = (ARTICLE *)malloc(sizeof(ARTICLE));
+                    *caddie[i] = art;
+                    printf("Dans la vérif\n");
                 }
 
             }
@@ -188,7 +211,10 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
         
         int i;
 
-        for (i = 0; caddie[i]->id != NULL; i++) {
+        puts("Dans CADDIE");
+        for (i = 0; caddie[i] != NULL; i++) {
+            printf("I: %d  prix: %f\n",i,caddie[i]->prix);
+
             sprintf(reponse + strlen(reponse), "#%d#%s#%.2f#%d#%s", caddie[i]->id, caddie[i]->intitule, caddie[i]->prix, caddie[i]->stock, caddie[i]->image);
         }
     }
@@ -214,7 +240,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
         int i;
 
-        for (i = 0; caddie[i]->id != NULL; i++)
+        for (i = 0; caddie[i] != NULL; i++)
             OVESP_Cancel(i, connexion);
 
         sprintf(reponse,"CANCEL ALL#OK");
@@ -226,7 +252,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
 bool OVESP_Cancel(int idArticle, MYSQL* connexion)
 {
-    sprintf(requete_sql,"select * from UNIX_FINAL");
+    sprintf(requete_sql,"select * from ARTICLE");
         
     if(mysql_query(connexion,requete_sql) != 0)
     {
@@ -251,7 +277,7 @@ bool OVESP_Cancel(int idArticle, MYSQL* connexion)
 
         for (i = 0; caddie[i]->id != idArticle; i++);
 
-        sprintf(requete_sql,"update UNIX_FINAL set stock=%d where id=%d", stock+caddie[i]->stock, atoi(ligne[0]));
+        sprintf(requete_sql,"update ARTICLE set stock=%d where id=%d", stock+caddie[i]->stock, atoi(ligne[0]));
                  
         if(mysql_query(connexion,requete_sql) != 0)
         {

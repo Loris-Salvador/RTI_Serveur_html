@@ -8,6 +8,9 @@ using namespace std;
 
 extern WindowClient *w;
 
+int CurrentIdArticle = 0;
+int sClient;
+
 #define REPERTOIRE_IMAGES "images/"
 
 WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::WindowClient)
@@ -32,8 +35,6 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
     setPublicite("!!! Bienvenue sur le Maraicher en ligne !!!");
 
     // Exemples à supprimer
-    setArticle("pommes",5.53,18,"pommes.jpg");
-    ajouteArticleTablePanier("cerises",8.96,2);
 }
 
 WindowClient::~WindowClient()
@@ -279,21 +280,46 @@ void WindowClient::on_pushButtonLogin_clicked()
   const char *password = getMotDePasse();
   bool isNewClient = isNouveauClientChecked();
 
-  char requete[200];
+  char requete[200], reponse[200];
 
-  LoginRequestToString(user, password, isNewClient, requete);
+  LoginRequestToString(requete, user, password, isNewClient);
 
-
-  int sClient;
   char ipServeur[20];
 
   strcpy(ipServeur, IP_SERVEUR);
 
-
   sClient = ClientSocket(ipServeur, PORT_SERVEUR);
-
-
   Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+
+  char etat[3], message[50];
+
+  strcpy(etat,strtok(NULL,"#"));
+  strcpy(message,strtok(NULL,"#"));
+
+
+  if (strcmp(ptr,"LOGIN") == 0)
+  {
+    if (strcmp(etat,"OK") == 0)
+    {
+      loginOK();
+      dialogueMessage("LOGIN",message);
+    }
+    else if (strcmp(etat,"BAD") == 0)
+    {
+      dialogueErreur("LOGIN",message);
+    }
+    else//Normalement pas besoin
+      dialogueErreur(ptr,message);
+  }
+  else
+    dialogueErreur(ptr,message);
+
+  CurrentIdArticle--;
+  on_pushButtonSuivant_clicked();
+  
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,18 +331,133 @@ void WindowClient::on_pushButtonLogout_clicked()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonSuivant_clicked()
 {
+  char requete[200], reponse[200];
 
+  CurrentIdArticle = (CurrentIdArticle+1)%21;
+
+  sprintf(requete, "%s%s%d", CONSULT, CS, CurrentIdArticle+1);
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+  char message[50];
+  int idArticle;
+
+  idArticle = atoi(strtok(NULL,"#"));
+  strcpy(message,strtok(NULL,"#"));
+
+  if (strcmp(ptr,"CONSULT") == 0)
+  {
+    if (idArticle != -1)
+    {
+      int stock;
+      char image[50];
+      float prix;
+
+      stock = atoi(strtok(NULL,"#"));
+      strcpy(image,strtok(NULL,"#"));
+      prix = atof(strtok(NULL,"#"));
+
+      setArticle(message, prix, stock, image);
+    }
+    else
+      dialogueErreur(ptr,message);
+  }
+  else
+    dialogueErreur(ptr,message);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonPrecedent_clicked()
 {
+  char requete[200], reponse[200];
 
+  CurrentIdArticle = (CurrentIdArticle+20)%21;
+
+  sprintf(requete, "%s%s%d", CONSULT, CS, CurrentIdArticle+1);
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+  char message[50];
+  int idArticle;
+
+  idArticle = atoi(strtok(NULL,"#"));
+  strcpy(message,strtok(NULL,"#"));
+
+  if (strcmp(ptr,"CONSULT") == 0)
+  {
+    if (idArticle != -1)
+    {
+      int stock;
+      char image[50];
+      float prix;
+
+      stock = atoi(strtok(NULL,"#"));
+      strcpy(image,strtok(NULL,"#"));
+      prix = atof(strtok(NULL,"#"));
+
+      setArticle(message, prix, stock, image);
+    }
+    else
+      dialogueErreur(ptr,message);
+  }
+  else
+    dialogueErreur(ptr,message);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonAcheter_clicked()
 {
+  char requete[200], reponse[200];
+
+  sprintf(requete, "%s%s%d%s%d", ACHAT, CS, CurrentIdArticle+1, CS, getQuantite());
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+  int idArticle, quantite;
+  float prix;
+  char intitule[30];
+
+  idArticle = atoi(strtok(NULL,"#"));
+
+  if (strcmp(ptr,"ACHAT") == 0)
+  {
+    if (idArticle != -1)
+    {
+      quantite = atoi(strtok(NULL,"#"));
+
+      if (quantite != 0)
+      {
+        strcpy(intitule,strtok(NULL,"#"));
+        prix = atof(strtok(NULL,"#"));
+
+        ajouteArticleTablePanier(intitule,prix,quantite);
+
+        CurrentIdArticle--;
+        on_pushButtonSuivant_clicked();
+      }
+      else
+        dialogueErreur(ptr, "Not Enough Stock");
+    }
+    else
+      dialogueErreur(ptr, "Not Found");
+  }
+  else
+    dialogueErreur(ptr,"Error");
+
+
+  char requeteConsult[200], reponseConsult[200];
+
+  sprintf(requeteConsult, "%s", CADDIE);
+
+  Send(sClient, requeteConsult, strlen(requeteConsult));
+  Receive(sClient, reponseConsult);
+
 
 }
 
