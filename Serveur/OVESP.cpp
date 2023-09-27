@@ -52,11 +52,7 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
         strcpy(user,strtok(NULL,"#"));
         strcpy(password,strtok(NULL,"#"));
 
-        printf("\n\npassword : %s", password);
-
         int newclient = atoi(strtok(NULL,"#"));
-
-        printf("\n\npassword : %s", password);
 
         
         printf("\t[THREAD %p] LOGIN de %s\n",pthread_self(),user);
