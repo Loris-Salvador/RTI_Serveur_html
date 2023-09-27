@@ -20,8 +20,6 @@ int sEcoute;
 
 MYSQL* connexion;
 
-
-
 #define NB_THREADS_POOL 2
 #define TAILLE_FILE_ATTENTE 20
 int socketsAcceptees[TAILLE_FILE_ATTENTE];
@@ -65,10 +63,10 @@ int main(int argc,char* argv[])
   }
 
   printf("Création du pool de threads.\n");
-  pthread_t th;
+  pthread_t th[NB_THREADS_POOL];
 
   for (int i=0 ; i<NB_THREADS_POOL ; i++)
-    pthread_create(&th,NULL,FctThreadClient,NULL);
+    pthread_create(&th[i],NULL,FctThreadClient,NULL);
 
 
   //CONNEXION DB
@@ -128,25 +126,16 @@ void* FctThreadClient(void* p)
     socketsAcceptees[indiceLecture] = -1;
     indiceLecture++;
 
-    if (indiceLecture == TAILLE_FILE_ATTENTE) indiceLecture = 0;
-      pthread_mutex_unlock(&mutexSocketsAcceptees);
+    if (indiceLecture == TAILLE_FILE_ATTENTE) 
+      indiceLecture = 0;
+      
+    pthread_mutex_unlock(&mutexSocketsAcceptees);
     
-    printf("\t[THREAD %p] Je m'occupe de la socket %d\n",
-    pthread_self(),sService);
+    printf("\t[THREAD %p] Je m'occupe de la socket %d\n",pthread_self(),sService);
     TraitementConnexion(sService);
  }
 }
-void HandlerSIGINT(int s)
-{
-  printf("\nArret du serveur.\n");
-  close(sEcoute);
-  pthread_mutex_lock(&mutexSocketsAcceptees);
-  for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
-  if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
-  pthread_mutex_unlock(&mutexSocketsAcceptees);
-  //SMOP_Close();
-  exit(0);
-}
+
 void TraitementConnexion(int sService)
 {
   char requete[200], reponse[200];
@@ -187,13 +176,8 @@ void TraitementConnexion(int sService)
     }
 
     printf("\t[THREAD %p] Reponse envoyee = %s\n",pthread_self(),reponse);
-    // if (!onContinue)
-    // {
-    //   strcpy(requete, "CANCEL ALL");
-    //   OVESP(requete, reponse, sService, panier, connexion);
-    //   free(panier);
-    //   printf("\t[THREAD %p] Fin de connexion de la socket %d\n",pthread_self(),sService);
-    // }
+
+
     if(!onContinue)
     {
       close(sService);
@@ -201,3 +185,15 @@ void TraitementConnexion(int sService)
   }
 }
 
+
+void HandlerSIGINT(int s)
+{
+  printf("\nArret du serveur.\n");
+  close(sEcoute);
+  pthread_mutex_lock(&mutexSocketsAcceptees);
+  for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
+  if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
+  pthread_mutex_unlock(&mutexSocketsAcceptees);
+  //SMOP_Close();
+  exit(0);
+}

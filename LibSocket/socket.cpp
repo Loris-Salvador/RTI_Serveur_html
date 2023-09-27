@@ -17,6 +17,15 @@ int ServerSocket(int port)
         exit(1);
     }
 
+    //cheat//
+
+    int option = 1;
+
+    if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
+
+    /////////
+
     struct addrinfo *results;
     struct addrinfo hints;
     memset(&hints,0,sizeof(struct addrinfo));
@@ -81,6 +90,16 @@ int ClientSocket(char* ipServeur,int portServeur)
         perror("Erreur de socket()");
         exit(1);
     }
+
+
+    //cheat///
+
+    int option = 1;
+    if (setsockopt(sClient, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
+
+
+    /////////////
 
 
     struct addrinfo hints;
@@ -163,4 +182,9 @@ int Receive(int sSocket,char* data)
     }
     return i;
 
+}
+
+void CloseSocket(int socket)
+{
+    close(socket);
 }

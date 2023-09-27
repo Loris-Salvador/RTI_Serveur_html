@@ -8,6 +8,7 @@ int Accept(int sEcoute,char *ipClient);
 int ClientSocket(char* ipServeur,int portServeur);
 int Send(int sSocket,char* data,int taille);
 int Receive(int sSocket,char* data);
+void CloseSocket(int socket);
 
 
 #endif

@@ -328,6 +328,18 @@ void WindowClient::on_pushButtonLogout_clicked()
   char requete[200];
   char reponse[200];
 
+  sprintf(requete, "%s", CANCEL_ALL);
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  strtok(reponse,"#");
+  char OK [3];
+  strcpy(OK, strtok(NULL,"#"));
+
+
+
+
   strcpy(requete, "LOGOUT");
 
   Send(sClient, requete, strlen(requete));
@@ -343,7 +355,10 @@ void WindowClient::on_pushButtonLogout_clicked()
     dialogueErreur(ptr,"ERROR");
     return;
   }
-      
+
+  CloseSocket(sClient); //deja fait??
+  CloseSocket()
+
   logoutOK();
 
 
@@ -466,7 +481,7 @@ void WindowClient::on_pushButtonViderPanier_clicked()
   Send(sClient, requete, strlen(requete));
   Receive(sClient, reponse);
 
-  char *ptr = strtok(reponse,"#");
+  strtok(reponse,"#");
   char OK [3];
   strcpy(OK, strtok(NULL,"#"));
 
@@ -504,7 +519,8 @@ void WindowClient::Actualiser_Panier()
     Send(sClient, requeteConsult, strlen(requeteConsult));
     Receive(sClient, reponseConsult);
 
-    char *ptr = strtok(reponseConsult,"#");
+    strtok(reponseConsult,"#");
+    
     char OK [3];
     strcpy(OK, strtok(NULL,"#"));
 
