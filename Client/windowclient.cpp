@@ -295,7 +295,7 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   char *ptr = strtok(reponse,"#");
 
-  char etat[3], message[50];
+  char etat[4], message[50];
 
   strcpy(etat,strtok(NULL,"#"));
   strcpy(message,strtok(NULL,"#"));
@@ -325,6 +325,31 @@ void WindowClient::on_pushButtonLogin_clicked()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonLogout_clicked()
 {
+  char requete[200];
+  char reponse[200];
+
+  strcpy(requete, "LOGOUT");
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char etat[4];
+
+  char *ptr = strtok(reponse,"#");
+  strcpy(etat,strtok(NULL,"#"));
+
+  if(strcmp(etat, "BAD") == 0)
+  {
+    dialogueErreur(ptr,"ERROR");
+    return;
+  }
+      
+  logoutOK();
+
+
+
+
+
   
 }
 
