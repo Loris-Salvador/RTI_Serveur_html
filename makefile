@@ -1,37 +1,54 @@
 .SILENT:
 
 
+SERV_OVESP = ./Serveur/OVESP
+CLI_OBJ = ./Client/objets
+CLI_PRO = ./Client/Protocole
+SOCK = ./LibSocket
+CLI = ./Client
+SERV = ./Serveur
 
-all:	./ClientQt/mainclient.o ./ClientQt/windowclient.o ./ClientQt/moc_windowclient.o ./Librairie/socket.o ./Librairie/convention.o ./Serveur/OVESP.o
-		g++ -Wno-unused-parameter -o ./ClientQt/Client ./ClientQt/mainclient.o ./ClientQt/windowclient.o ./Librairie/socket.o ./Librairie/convention.o ./ClientQt/moc_windowclient.o /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Core.so /usr/lib64/libGL.so -lpthread
-		g++ -o ./Serveur/Serveur ./Serveur/Serveur.cpp ./Librairie/socket.o ./Serveur/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient
 
 
-./Serveur/OVESP.o:	./Serveur/OVESP.cpp
-	g++ -c ./Serveur/OVESP.cpp -o ./Serveur/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient -lz -lm -lrt -lssl -lcrypto -ldl
+all:	$(CLI_OBJ)/mainclient.o $(CLI_OBJ)/windowclient.o $(CLI_OBJ)/moc_windowclient.o $(SOCK)/socket.o $(CLI_PRO)/protocole.o $(SERV_OVESP)/OVESP.o
+		g++ -Wno-unused-parameter -o ./Client/Client $(CLI_OBJ)/mainclient.o $(CLI_OBJ)/windowclient.o $(SOCK)/socket.o $(CLI_PRO)/protocole.o $(CLI_OBJ)/moc_windowclient.o /usr/lib64/libQt5Widgets.so /usr/lib64/libQt5Gui.so /usr/lib64/libQt5Core.so /usr/lib64/libGL.so -lpthread
+		g++ -o ./Serveur/Serveur $(SERV)/Serveur.cpp $(SOCK)/socket.o $(SERV_OVESP)/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient
 
-./Libraire/convention.o:	./Librairie/convention.cpp
-	g++ -c ./Librairie/convention.cpp -o ./Librairie/convention.o
 
-./Librairie/socket.o:	./Librairie/socket.h	./Librairie/socket.cpp
-	g++ -c ./Librairie/socket.cpp -o ./Librairie/socket.o
 
-./ClientQt/mainclient.o:	./ClientQt/mainclient.cpp
-		g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o ./ClientQt/mainclient.o ./ClientQt/mainclient.cpp
+$(SERV_OVESP)/OVESP.o:	$(SERV_OVESP)/OVESP.cpp
+	echo Creation OVESP...
+	g++ -c $(SERV_OVESP)/OVESP.cpp -o $(SERV_OVESP)/OVESP.o -I/usr/include/mysql -lpthread -L/usr/lib64/mysql -lmysqlclient -lz -lm -lrt -lssl -lcrypto -ldl
 
-./ClientQt/windowclient.o:	./ClientQt/windowclient.cpp
-		g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o ./ClientQt/windowclient.o ./ClientQt/windowclient.cpp
+$(CLI_PRO)/protocole.o:	$(CLI_PRO)/protocole.cpp
+	echo Creation protocole Client...
+	g++ -c $(CLI_PRO)/protocole.cpp -o $(CLI_PRO)/protocole.o
 
-./ClientQt/moc_windowclient.o:	./ClientQt/moc_windowclient.cpp
-		g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o ./ClientQt/moc_windowclient.o ./ClientQt/moc_windowclient.cpp
+$(SOCK)/socket.o:	$(SOCK)/socket.cpp
+	echo Creation LibSocket...
+	g++ -c $(SOCK)/socket.cpp -o $(SOCK)/socket.o
+
+$(CLI_OBJ)/mainclient.o:	$(CLI)/mainclient.cpp
+	echo Creation mainclient...
+	g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o $(CLI_OBJ)/mainclient.o $(CLI)/mainclient.cpp
+
+$(CLI_OBJ)/windowclient.o:	$(CLI)/windowclient.cpp
+	echo Creation windowClient...
+	g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o $(CLI_OBJ)/windowclient.o $(CLI)/windowclient.cpp
+
+$(CLI_OBJ)/moc_windowclient.o:	$(CLI)/moc_windowclient.cpp
+	echo Creation moc_windowclient...
+	g++ -Wno-unused-parameter -c -pipe -g -std=gnu++11 -Wall -W -D_REENTRANT -fPIC -DQT_DEPRECATED_WARNINGS -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I../UNIX_DOSSIER_FINAL -I. -isystem /usr/include/qt5 -isystem /usr/include/qt5/QtWidgets -isystem /usr/include/qt5/QtGui -isystem /usr/include/qt5/QtCore -I. -I. -I/usr/lib64/qt5/mkspecs/linux-g++ -o $(CLI_OBJ)/moc_windowclient.o $(CLI)/moc_windowclient.cpp
 
 
 clean:
-	rm ./ClientQt/*o
-	rm ./Librairie/*o
+	rm $(CLI_OBJ)/*
+	rm $(CLI_PRO)/*o
+	rm $(SERV_OVESP)/*o
+	rm $(SOCK)/*o
+	echo Objets supprimes
 
 clobber:
-	rm ./ClientQt/Client
+	rm ./Client/Client
 	rm ./Serveur/Serveur
-	rm ./ClientQt/*o
-	rm ./Librairie/*o
+	echo Executable supprimes

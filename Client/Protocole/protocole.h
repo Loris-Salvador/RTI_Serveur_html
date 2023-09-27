@@ -1,5 +1,5 @@
-#ifndef CONVENTION_H
-#define CONVENTION_H
+#ifndef PROTOCOLE_H
+#define PROTOCOLE_H
 
 #define CS "#"
 #define LOGIN "LOGIN"

@@ -4,10 +4,9 @@
 #include <string.h>
 #include <signal.h>
 #include <pthread.h>
-#include "../Librairie/socket.h"
-#include "OVESP.h"
+#include "../LibSocket/socket.h"
+#include "OVESP/OVESP.h"
 #include <mysql.h>
-
 
 #define NB_ARTICLE_MAX 10
 

@@ -2,8 +2,8 @@
 #include "ui_windowclient.h"
 #include <QMessageBox>
 #include <string>
-#include "../Librairie/socket.h"
-#include "../Librairie/convention.h"
+#include "../LibSocket/socket.h"
+#include "./Protocole/protocole.h"
 
 using namespace std;
 
