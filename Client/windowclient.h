@@ -40,6 +40,9 @@ public:
     void dialogueMessage(const char *titre, const char *message);
     void dialogueErreur(const char *titre, const char *message);
 
+    void Actualiser_Panier();
+    void AfficherArticle(int idArticle);
+
 private slots:
     void on_pushButtonLogin_clicked();
     void on_pushButtonLogout_clicked();

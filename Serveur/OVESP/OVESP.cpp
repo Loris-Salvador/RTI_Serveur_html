@@ -79,11 +79,16 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
             sprintf(reponse,"LOGIN#OK#Nouveau Client");
         }
         else // Ce "user" est déjà utilisé
+        {
+            sprintf(reponse,"LOGIN#BAD#Nom de Client deja utilise !");
             return false;
+
+        }
+            
     
     }
     // ***** LOGOUT *****************************************
-    else if (strcmp(ptr,"LOGOUT") == 0)
+    if (strcmp(ptr,"LOGOUT") == 0)
     {
         printf("\t[THREAD %p] LOGOUT\n",pthread_self());
         sprintf(reponse,"LOGOUT#OK");
@@ -146,6 +151,15 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
         int idArticle = atoi(strtok(NULL,"#"));
 
+        int j;
+        for(j=0; caddie[j] != NULL; j++);
+
+        if(j == 10)
+        {
+            sprintf(reponse,"ACHAT#0#0#plus de place dans le panier");
+            return 1;
+        }
+
         while ((ligne = mysql_fetch_row(resultat)) != NULL && atoi(ligne[0]) != idArticle);//recherche du bon article en fct de l'id
 
         if(ligne != NULL && atoi(ligne[0]) == idArticle)// est-ce qu'on la trouvé ?           
@@ -173,8 +187,6 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
                 strcpy(art.image, ligne[4]);
                 art.prix = atof(ligne[2]);
 
-                printf("art: %f\n", art.prix);
-
                 int i;
                 for (i = 0; caddie[i] != NULL && i<10; i++);
 
@@ -182,7 +194,6 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
                 {
                     caddie[i] = (ARTICLE *)malloc(sizeof(ARTICLE));
                     *caddie[i] = art;
-                    printf("Dans la vérif\n");
                 }
 
             }
@@ -199,16 +210,19 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
     {
         printf("\t[THREAD %p] CADDIE\n",pthread_self());
 
+        char chaine[500];
+        memset(chaine, 0, sizeof(chaine));
+
         sprintf(reponse,"CADDIE#OK"); // Chaine pour stocker les éléments concaténés
         
         int i;
 
-        puts("Dans CADDIE");
         for (i = 0; caddie[i] != NULL; i++) {
-            printf("I: %d  prix: %f\n",i,caddie[i]->prix);
-
-            sprintf(reponse + strlen(reponse), "#%d#%s#%.2f#%d#%s", caddie[i]->id, caddie[i]->intitule, caddie[i]->prix, caddie[i]->stock, caddie[i]->image);
+            sprintf(chaine+ strlen(chaine), "#%d#%s#%d#%s#%.2f", caddie[i]->id, caddie[i]->intitule, caddie[i]->stock, caddie[i]->image, caddie[i]->prix);
         }
+
+        sprintf(reponse+ strlen(reponse), "#%d",i);
+        strcat(reponse, chaine);
     }
 
     // ***** CANCEL *****************************************
@@ -216,9 +230,9 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
     {
         printf("\t[THREAD %p] CANCEL\n",pthread_self());
 
-        int idArticle = atoi(strtok(NULL,"#"));
+        int indice = atoi(strtok(NULL,"#"));
 
-        if(OVESP_Cancel(idArticle, connexion))
+        if(OVESP_Cancel(indice, connexion))
             sprintf(reponse,"CANCEL#OK");
         else
             sprintf(reponse,"CANCEL#BAD");
@@ -232,8 +246,8 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
         int i;
 
-        for (i = 0; caddie[i] != NULL; i++)
-            OVESP_Cancel(i, connexion);
+        while(caddie[0] != NULL)
+            OVESP_Cancel(0, connexion);
 
         sprintf(reponse,"CANCEL ALL#OK");
     }
@@ -242,9 +256,8 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 }
 
 
-bool OVESP_Cancel(int idArticle, MYSQL* connexion)
+bool OVESP_Cancel(int indice, MYSQL* connexion)
 {
-
     MYSQL_ROW ligne;
     char requete_sql[200];
     MYSQL_RES  *resultat;
@@ -265,17 +278,14 @@ bool OVESP_Cancel(int idArticle, MYSQL* connexion)
     }
 
 
-    while ((ligne = mysql_fetch_row(resultat)) != NULL && atoi(ligne[0]) != idArticle);//recherche du bon article en fct de l'id
+    while ((ligne = mysql_fetch_row(resultat)) != NULL && atoi(ligne[0]) != caddie[indice]->id);//recherche du bon article en fct de l'id
 
 
-    if(ligne != NULL && atoi(ligne[0]) == idArticle)// est-ce qu'on la trouvé ?           
+    if(ligne != NULL && atoi(ligne[0]) == caddie[indice]->id)// est-ce qu'on la trouvé ?           
     {
         int stock=atoi(ligne[3]);
-        int i;
 
-        for (i = 0; caddie[i]->id != idArticle; i++);
-
-        sprintf(requete_sql,"update ARTICLE set stock=%d where id=%d", stock+caddie[i]->stock, atoi(ligne[0]));
+        sprintf(requete_sql,"update ARTICLE set stock=%d where id=%d", stock+caddie[indice]->stock, caddie[indice]->id);
                  
         if(mysql_query(connexion,requete_sql) != 0)
         {
@@ -283,13 +293,19 @@ bool OVESP_Cancel(int idArticle, MYSQL* connexion)
             exit(1);
         }
 
-        free(caddie[i]);
+        free(caddie[indice]);
+
+        int j;
+        for(j = indice ; j<9 && caddie[j+1] != NULL ; j++)
+            caddie[j] = caddie[j+1];
+
+        caddie[j] = NULL;
 
         return true;
     }
     else
         return false;
-}
+}  
 
 
 

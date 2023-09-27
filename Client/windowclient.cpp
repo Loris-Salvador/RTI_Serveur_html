@@ -311,7 +311,7 @@ void WindowClient::on_pushButtonLogin_clicked()
     else if (strcmp(etat,"BAD") == 0)
     {
       dialogueErreur("LOGIN",message);
-      return;//bot???
+      return;
     }
     else//Normalement pas besoin
       dialogueErreur(ptr,message);
@@ -319,9 +319,7 @@ void WindowClient::on_pushButtonLogin_clicked()
   else
     dialogueErreur(ptr,message);
 
-  CurrentIdArticle--;
-  on_pushButtonSuivant_clicked();
-  
+  AfficherArticle(CurrentIdArticle);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -333,87 +331,26 @@ void WindowClient::on_pushButtonLogout_clicked()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonSuivant_clicked()
 {
-  char requete[200], reponse[200];
-
   CurrentIdArticle = (CurrentIdArticle+1)%21;
 
-  sprintf(requete, "%s%s%d", CONSULT, CS, CurrentIdArticle+1);
-
-  Send(sClient, requete, strlen(requete));
-  Receive(sClient, reponse);
-
-  char *ptr = strtok(reponse,"#");
-  char message[50];
-  int idArticle;
-
-  idArticle = atoi(strtok(NULL,"#"));
-  strcpy(message,strtok(NULL,"#"));
-
-  if (strcmp(ptr,"CONSULT") == 0)
-  {
-    if (idArticle != -1)
-    {
-      int stock;
-      char image[50];
-      float prix;
-
-      stock = atoi(strtok(NULL,"#"));
-      strcpy(image,strtok(NULL,"#"));
-      prix = atof(strtok(NULL,"#"));
-
-      setArticle(message, prix, stock, image);
-    }
-    else
-      dialogueErreur(ptr,message);
-  }
-  else
-    dialogueErreur(ptr,message);
+  AfficherArticle(CurrentIdArticle);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonPrecedent_clicked()
 {
-  char requete[200], reponse[200];
-
   CurrentIdArticle = (CurrentIdArticle+20)%21;
 
-  sprintf(requete, "%s%s%d", CONSULT, CS, CurrentIdArticle+1);
-
-  Send(sClient, requete, strlen(requete));
-  Receive(sClient, reponse);
-
-  char *ptr = strtok(reponse,"#");
-  char message[50];
-  int idArticle;
-
-  idArticle = atoi(strtok(NULL,"#"));
-  strcpy(message,strtok(NULL,"#"));
-
-  if (strcmp(ptr,"CONSULT") == 0)
-  {
-    if (idArticle != -1)
-    {
-      int stock;
-      char image[50];
-      float prix;
-
-      stock = atoi(strtok(NULL,"#"));
-      strcpy(image,strtok(NULL,"#"));
-      prix = atof(strtok(NULL,"#"));
-
-      setArticle(message, prix, stock, image);
-    }
-    else
-      dialogueErreur(ptr,message);
-  }
-  else
-    dialogueErreur(ptr,message);
+  AfficherArticle(CurrentIdArticle);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonAcheter_clicked()
 {
   char requete[200], reponse[200];
+
+  if(getQuantite() == 0)
+    return;
 
   sprintf(requete, "%s%s%d%s%d", ACHAT, CS, CurrentIdArticle+1, CS, getQuantite());
 
@@ -429,14 +366,24 @@ void WindowClient::on_pushButtonAcheter_clicked()
 
   if (strcmp(ptr,"ACHAT") == 0)
   {
-    if (idArticle != -1)
+    if(idArticle == 0)
+    {
+      quantite = atoi(strtok(NULL,"#"));
+      strcpy(intitule,strtok(NULL,"#"));
+      dialogueErreur(ptr, intitule);
+    }
+
+    else if (idArticle != -1)
     {
       quantite = atoi(strtok(NULL,"#"));
 
       if (quantite != 0)
       {
         strcpy(intitule,strtok(NULL,"#"));
+
+        setlocale(LC_NUMERIC, "C");
         prix = atof(strtok(NULL,"#"));
+        setlocale(LC_NUMERIC, "");
 
         ajouteArticleTablePanier(intitule,prix,quantite);
 
@@ -452,31 +399,156 @@ void WindowClient::on_pushButtonAcheter_clicked()
   else
     dialogueErreur(ptr,"Error");
 
-
-  char requeteConsult[200], reponseConsult[200];
-
-  sprintf(requeteConsult, "%s", CADDIE);
-
-  Send(sClient, requeteConsult, strlen(requeteConsult));
-  Receive(sClient, reponseConsult);
-
-
+  Actualiser_Panier();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonSupprimer_clicked()
 {
+  char requete[200], reponse[200];
 
+  if(getIndiceArticleSelectionne() == -1)
+    return;
+
+  sprintf(requete, "%s%s%d", CANCEL, CS, getIndiceArticleSelectionne());
+
+  Send(sClient, requete, strlen(requete));
+
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+
+
+  char etat[4];
+  strcpy(etat,strtok(NULL,"#"));
+
+
+  if(strcmp(etat, "OK")==0)
+  {
+    Actualiser_Panier();
+    AfficherArticle(CurrentIdArticle);
+  }
+  else
+    dialogueErreur(ptr,"Error");
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonViderPanier_clicked()
 {
+  char requete[200],reponse[200];
+  sprintf(requete, "%s", CANCEL_ALL);
 
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+  char OK [3];
+  strcpy(OK, strtok(NULL,"#"));
+
+  if(strcmp(OK,"OK") != 0)
+  {
+    dialogueErreur("Vider Panier", "Error");
+    return;
+  }
+
+
+  Actualiser_Panier();
+  AfficherArticle(CurrentIdArticle);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonPayer_clicked()
 {
 
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//        NOS FONCTIONS                                                                                     //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void WindowClient::Actualiser_Panier()
+{
+    videTablePanier();
+
+    char requeteConsult[200], reponseConsult[500];
+
+    sprintf(requeteConsult, "%s", CADDIE);
+
+    Send(sClient, requeteConsult, strlen(requeteConsult));
+    Receive(sClient, reponseConsult);
+
+    char *ptr = strtok(reponseConsult,"#");
+    char OK [3];
+    strcpy(OK, strtok(NULL,"#"));
+
+    int count = atoi(strtok(NULL,"#"));
+
+    char id[3], intitule[20], stock[3], image[30];
+
+    float prix, total =0;
+
+    int i;
+    for(i = 0; i < count; i++)
+    {
+      strcpy(id, strtok(NULL,"#"));
+      strcpy(intitule, strtok(NULL,"#"));
+      strcpy(stock, strtok(NULL,"#"));
+      strcpy(image, strtok(NULL,"#"));
+
+      setlocale(LC_NUMERIC, "C");
+      prix = atof(strtok(NULL,"#"));
+      setlocale(LC_NUMERIC, "");
+
+      total = total + prix*atoi(stock);
+
+      ajouteArticleTablePanier(intitule, prix, atoi(stock));
+    }
+    
+    setTotal(total);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void WindowClient::AfficherArticle(int id)
+{
+  char requete[200], reponse[200];
+
+  id++;
+
+  sprintf(requete, "%s%s%d", CONSULT, CS, id);
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  char *ptr = strtok(reponse,"#");
+  char message[50];
+  int idArticle;
+
+  idArticle = atoi(strtok(NULL,"#"));
+  strcpy(message,strtok(NULL,"#"));
+
+  if (strcmp(ptr,"CONSULT") == 0)
+  {
+    if (idArticle != -1)
+    {
+      int stock;
+      char image[50];
+      float prix;
+
+      stock = atoi(strtok(NULL,"#"));
+      strcpy(image,strtok(NULL,"#"));
+
+      setlocale(LC_NUMERIC, "C");
+      prix = atof(strtok(NULL,"#"));
+      setlocale(LC_NUMERIC, "");
+
+
+      setArticle(message, prix, stock, image);
+    }
+    else
+      dialogueErreur(ptr,message);
+  }
+  else
+    dialogueErreur(ptr,message);
 }
