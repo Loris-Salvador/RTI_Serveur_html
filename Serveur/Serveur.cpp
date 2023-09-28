@@ -109,6 +109,8 @@ int main(int argc,char* argv[])
 
     printf("Attente d'une connexion...\n");
 
+    printf("\nAvant NbClientFile = %d\n", nbClientFile);
+
     while(nbClientFile == TAILLE_FILE_ATTENTE)
     {
       printf("File complete... Attente...    %d\n", nbClientFile);
@@ -155,8 +157,10 @@ int main(int argc,char* argv[])
     pthread_mutex_unlock(&mutexNbClientFile);
     pthread_cond_signal(&condSocketsAcceptees);
 
+
     struct timespec temps = {0, 000500000};
     nanosleep(&temps, NULL);
+    //pour laisser les thread lock le mutex avant de le relock
 
 
 
@@ -248,7 +252,10 @@ void TraitementConnexion(int sService)
       close(sService);
       pthread_mutex_lock(&mutexNbClientFile);
       if(nbClientFile == TAILLE_FILE_ATTENTE)
+      {
         pthread_cond_signal(&condFileFull);
+        printf("nbClient %d\n", nbClientFile);
+      }
       nbClientFile--;
       pthread_mutex_unlock(&mutexNbClientFile);
     }

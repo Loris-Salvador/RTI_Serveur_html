@@ -4,6 +4,10 @@
 #include <string>
 #include "../LibSocket/socket.h"
 #include "./Protocole/protocole.h"
+#include <signal.h>
+#include <csignal>
+#include <unistd.h>
+
 
 using namespace std;
 
@@ -11,8 +15,12 @@ extern WindowClient *w;
 
 int CurrentIdArticle = 0;
 int sClient;
+bool alarmeActivee = false;
 
 #define REPERTOIRE_IMAGES "images/"
+
+void HandlerSIGALRM(int sig);
+
 
 WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::WindowClient)
 {
@@ -36,6 +44,23 @@ WindowClient::WindowClient(QWidget *parent) : QMainWindow(parent), ui(new Ui::Wi
     setPublicite("!!! Bienvenue sur le Maraicher en ligne !!!");
 
     // Exemples à supprimer
+
+
+
+    // Armement des signaux
+
+    struct sigaction A;
+    A.sa_handler =HandlerSIGALRM;
+    sigemptyset(&A.sa_mask);
+    A.sa_flags = 0;
+
+    if(sigaction(SIGALRM,&A,NULL) == -1)
+    {
+      perror("Erreur de sigaction");
+      exit(1);
+    }
+
+
 }
 
 WindowClient::~WindowClient()
@@ -277,6 +302,7 @@ void WindowClient::closeEvent(QCloseEvent *event)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonLogin_clicked()
 {
+  alarmeActivee = false;
   const char *user = getNom();
   const char *password = getMotDePasse();
   bool isNewClient = isNouveauClientChecked();
@@ -293,7 +319,15 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   sClient = ClientSocket(ipServeur, PORT_SERVEUR);
   Send(sClient, requete, strlen(requete));
+  alarm(3);
   Receive(sClient, reponse);
+  alarm(0);
+
+  if(alarmeActivee)
+  {
+    dialogueErreur("Erreur", "File d'attente pleine reessayez plus tard");
+    return;
+  }
 
   char *ptr = strtok(reponse,"#");
 
@@ -302,8 +336,6 @@ void WindowClient::on_pushButtonLogin_clicked()
   strcpy(etat,strtok(NULL,"#"));
   strcpy(message,strtok(NULL,"#"));
 
-  puts(etat);
-  puts(ptr);
 
   while(boucle)
   {
@@ -333,13 +365,11 @@ void WindowClient::on_pushButtonLogin_clicked()
       else
       {
         dialogueErreur(ptr,message);
-        printf("WHAT\n");
       }
     }
     else
     {
       dialogueErreur(ptr,message);
-      printf("What2\n");
     }
   }
   
@@ -618,3 +648,16 @@ void WindowClient::AfficherArticle(int id)
   else
     dialogueErreur(ptr,message);
 }
+
+
+//////////HANDLER///////////////
+
+
+void HandlerSIGALRM(int sig)
+{
+  printf("Alarme\n");
+  close(sClient);
+  alarmeActivee = true;
+
+}
+
