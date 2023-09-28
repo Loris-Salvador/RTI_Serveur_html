@@ -8,9 +8,9 @@
 #include "OVESP/OVESP.h"
 #include <mysql.h>
 
-#define NB_ARTICLE_MAX 10
 
-
+#define NB_THREADS_POOL 2
+#define TAILLE_FILE_ATTENTE 20
 
 
 void HandlerSIGINT(int s);
@@ -20,8 +20,7 @@ int sEcoute;
 
 MYSQL* connexion;
 
-#define NB_THREADS_POOL 2
-#define TAILLE_FILE_ATTENTE 20
+
 int socketsAcceptees[TAILLE_FILE_ATTENTE];
 int indiceEcriture=0, indiceLecture=0;
 pthread_mutex_t mutexSocketsAcceptees;
@@ -92,7 +91,6 @@ int main(int argc,char* argv[])
     {
       perror("Erreur de Accept");
       close(sEcoute);
-      //SMOP_Close();
       exit(1);
     }
 
@@ -190,10 +188,11 @@ void HandlerSIGINT(int s)
 {
   printf("\nArret du serveur.\n");
   close(sEcoute);
+
   pthread_mutex_lock(&mutexSocketsAcceptees);
   for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
   if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
   pthread_mutex_unlock(&mutexSocketsAcceptees);
-  //SMOP_Close();
+
   exit(0);
 }

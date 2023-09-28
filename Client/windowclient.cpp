@@ -357,8 +357,8 @@ void WindowClient::on_pushButtonLogout_clicked()
   }
 
   CloseSocket(sClient); //deja fait??
-  CloseSocket()
-
+  
+  
   logoutOK();
 
 
