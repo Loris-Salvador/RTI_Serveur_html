@@ -9,22 +9,38 @@
 #include <mysql.h>
 
 
-#define NB_THREADS_POOL 2
-#define TAILLE_FILE_ATTENTE 20
+#define NB_THREADS_POOL 1
+#define TAILLE_FILE_ATTENTE 2
+
+struct SocketClient {
+    int socket;
+    struct SocketClient* next;
+};
+typedef struct SocketClient SocketClient;
+
+
+int nbClientFile = 0;
+pthread_mutex_t mutexNbClientFile;
+pthread_cond_t condFileFull;
+pthread_cond_t condSocketsAcceptees;
+
+
+
+
 
 
 void HandlerSIGINT(int s);
 void TraitementConnexion(int sService);
 void* FctThreadClient(void* p);
-int sEcoute;
 
+
+int sEcoute;
 MYSQL* connexion;
 
+SocketClient* current;
+SocketClient* last;
 
-int socketsAcceptees[TAILLE_FILE_ATTENTE];
-int indiceEcriture=0, indiceLecture=0;
-pthread_mutex_t mutexSocketsAcceptees;
-pthread_cond_t condSocketsAcceptees;
+
 
 
 int main(int argc,char* argv[])
@@ -36,11 +52,10 @@ int main(int argc,char* argv[])
     exit(1);
   }
 
-  pthread_mutex_init(&mutexSocketsAcceptees,NULL);
+  pthread_mutex_init(&mutexNbClientFile,NULL);
+  pthread_cond_init(&condFileFull, NULL);
   pthread_cond_init(&condSocketsAcceptees,NULL);
 
-  for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
-    socketsAcceptees[i] = -1;
 
 
   struct sigaction A;
@@ -82,10 +97,23 @@ int main(int argc,char* argv[])
   char ipClient[50];
   printf("Demarrage du serveur.\n");
 
+  current = (SocketClient *) malloc(sizeof(SocketClient));
+  last = current;
+
+
 
   while(1)
   {
+    pthread_mutex_lock(&mutexNbClientFile);
+
+
     printf("Attente d'une connexion...\n");
+
+    while(nbClientFile == TAILLE_FILE_ATTENTE)
+    {
+      printf("File complete... Attente...    %d\n", nbClientFile);
+      pthread_cond_wait(&condFileFull, &mutexNbClientFile);
+    }
 
     if ((sService = Accept(sEcoute,ipClient)) == -1)
     {
@@ -94,18 +122,45 @@ int main(int argc,char* argv[])
       exit(1);
     }
 
+    if(nbClientFile == NB_THREADS_POOL)
+    {
+        char requete[200];
+        int nbEcrits;
+
+        strcpy(requete, "LOGIN#FILE#1");
+
+        if ((nbEcrits = Send(sService,requete,strlen(requete))) < 0)
+        {
+          perror("Erreur de Send");
+          close(sService);
+          HandlerSIGINT(0);
+        }
+    }
+
+
+
+    last->socket = sService;
+    last->next = (SocketClient *) malloc(sizeof(SocketClient));
+    last = last->next;
+    nbClientFile++;
+
+    printf("\nNbClientFile = %d\n", nbClientFile);
+
+
     printf("Connexion acceptée : IP=%s socket=%d\n",ipClient,sService);
-    pthread_mutex_lock(&mutexSocketsAcceptees);
 
 
-    socketsAcceptees[indiceEcriture] = sService;
-    indiceEcriture++;
 
-    if (indiceEcriture == TAILLE_FILE_ATTENTE)
-      indiceEcriture = 0;
 
-    pthread_mutex_unlock(&mutexSocketsAcceptees);
+    pthread_mutex_unlock(&mutexNbClientFile);
     pthread_cond_signal(&condSocketsAcceptees);
+
+    struct timespec temps = {0, 000500000};
+    nanosleep(&temps, NULL);
+
+
+
+
   }
 }
 void* FctThreadClient(void* p)
@@ -115,19 +170,31 @@ void* FctThreadClient(void* p)
  while(1)
  {
     printf("\t[THREAD %p] Attente socket...\n",pthread_self());
-    pthread_mutex_lock(&mutexSocketsAcceptees);
+    pthread_mutex_lock(&mutexNbClientFile);
 
-    while (indiceEcriture == indiceLecture)
-      pthread_cond_wait(&condSocketsAcceptees,&mutexSocketsAcceptees);
+    while (nbClientFile == 0)
+    {
+      printf("Wait\n");
+      pthread_cond_wait(&condSocketsAcceptees,&mutexNbClientFile);
 
-    sService = socketsAcceptees[indiceLecture];
-    socketsAcceptees[indiceLecture] = -1;
-    indiceLecture++;
+    }
 
-    if (indiceLecture == TAILLE_FILE_ATTENTE) 
-      indiceLecture = 0;
+
+
+    SocketClient* previous = current;
+
+
+    sService = current->socket;
+    current = current->next;
+
+
+    free(previous);
+
+    
+
+    
       
-    pthread_mutex_unlock(&mutexSocketsAcceptees);
+    pthread_mutex_unlock(&mutexNbClientFile);
     
     printf("\t[THREAD %p] Je m'occupe de la socket %d\n",pthread_self(),sService);
     TraitementConnexion(sService);
@@ -179,6 +246,11 @@ void TraitementConnexion(int sService)
     if(!onContinue)
     {
       close(sService);
+      pthread_mutex_lock(&mutexNbClientFile);
+      if(nbClientFile == TAILLE_FILE_ATTENTE)
+        pthread_cond_signal(&condFileFull);
+      nbClientFile--;
+      pthread_mutex_unlock(&mutexNbClientFile);
     }
   }
 }
@@ -189,10 +261,12 @@ void HandlerSIGINT(int s)
   printf("\nArret du serveur.\n");
   close(sEcoute);
 
-  pthread_mutex_lock(&mutexSocketsAcceptees);
-  for (int i=0 ; i<TAILLE_FILE_ATTENTE ; i++)
-  if (socketsAcceptees[i] != -1) close(socketsAcceptees[i]);
-  pthread_mutex_unlock(&mutexSocketsAcceptees);
+  SocketClient* temp;
+  while (current != NULL) {
+      temp = current;
+      current = current->next;
+      free(temp);
+  }
 
   exit(0);
 }

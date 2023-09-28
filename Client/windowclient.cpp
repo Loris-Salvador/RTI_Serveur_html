@@ -281,6 +281,8 @@ void WindowClient::on_pushButtonLogin_clicked()
   const char *password = getMotDePasse();
   bool isNewClient = isNouveauClientChecked();
 
+  bool boucle = true;
+
   char requete[200], reponse[200];
 
   LoginRequestToString(requete, user, password, isNewClient);
@@ -295,29 +297,52 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   char *ptr = strtok(reponse,"#");
 
-  char etat[4], message[50];
+  char etat[6], message[50];
 
   strcpy(etat,strtok(NULL,"#"));
   strcpy(message,strtok(NULL,"#"));
 
+  puts(etat);
+  puts(ptr);
 
-  if (strcmp(ptr,"LOGIN") == 0)
+  while(boucle)
   {
-    if (strcmp(etat,"OK") == 0)
+    boucle = false;
+    if (strcmp(ptr,"LOGIN") == 0)
     {
-      loginOK();
-      dialogueMessage("LOGIN",message);
+      if (strcmp(etat,"OK") == 0)
+      {
+        loginOK();
+        dialogueMessage("LOGIN",message);
+      }
+      else if (strcmp(etat,"BAD") == 0)
+      {
+        dialogueErreur("LOGIN",message);
+        return;
+      }
+      else if (strcmp(etat, "FILE") == 0)
+      {
+        dialogueMessage("LOGIN", "Vous avez ete place dans la file d'attente Veuillez patientez...");
+        Receive(sClient, reponse);
+        ptr = strtok(reponse,"#");
+        strcpy(etat,strtok(NULL,"#"));
+        strcpy(message,strtok(NULL,"#"));
+
+        boucle = true;
+      }
+      else
+      {
+        dialogueErreur(ptr,message);
+        printf("WHAT\n");
+      }
     }
-    else if (strcmp(etat,"BAD") == 0)
+    else
     {
-      dialogueErreur("LOGIN",message);
-      return;
-    }
-    else//Normalement pas besoin
       dialogueErreur(ptr,message);
+      printf("What2\n");
+    }
   }
-  else
-    dialogueErreur(ptr,message);
+  
 
   AfficherArticle(CurrentIdArticle);
 }
@@ -358,7 +383,7 @@ void WindowClient::on_pushButtonLogout_clicked()
 
   CloseSocket(sClient); //deja fait??
   
-  
+
   logoutOK();
 
 
