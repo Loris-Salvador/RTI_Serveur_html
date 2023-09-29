@@ -293,7 +293,7 @@ void WindowClient::dialogueErreur(const char* titre,const char* message)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::closeEvent(QCloseEvent *event)
 {
-
+  on_pushButtonLogout_clicked();
   exit(0);
 }
 
@@ -319,7 +319,7 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   sClient = ClientSocket(ipServeur, PORT_SERVEUR);
   Send(sClient, requete, strlen(requete));
-  alarm(3);
+  alarm(2);
   Receive(sClient, reponse);
   alarm(0);
 
@@ -411,7 +411,7 @@ void WindowClient::on_pushButtonLogout_clicked()
     return;
   }
 
-  CloseSocket(sClient); //deja fait??
+  CloseSocket(sClient);
   
 
   logoutOK();

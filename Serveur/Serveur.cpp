@@ -9,7 +9,7 @@
 #include <mysql.h>
 
 
-#define NB_THREADS_POOL 1
+#define NB_THREADS_POOL 2
 #define TAILLE_FILE_ATTENTE 1
 
 struct SocketClient {
@@ -21,7 +21,7 @@ typedef struct SocketClient SocketClient;
 
 int nbClientFile = 0;
 pthread_mutex_t mutexNbClientFile;
-pthread_cond_t condFileFull;
+pthread_mutex_t mutexDB;
 pthread_cond_t condSocketsAcceptees;
 
 
@@ -53,7 +53,7 @@ int main(int argc,char* argv[])
   }
 
   pthread_mutex_init(&mutexNbClientFile,NULL);
-  pthread_cond_init(&condFileFull, NULL);
+  pthread_mutex_init(&mutexDB,NULL);
   pthread_cond_init(&condSocketsAcceptees,NULL);
 
 
@@ -130,7 +130,7 @@ int main(int argc,char* argv[])
         char requete[200];
         int nbEcrits;
 
-        strcpy(requete, "LOGIN#FILE#1");
+        strcpy(requete, "LOGIN#FILE#Placer en file d'attente");
 
         if ((nbEcrits = Send(sService,requete,strlen(requete))) < 0)
         {
@@ -231,7 +231,9 @@ void TraitementConnexion(int sService)
 
     requete[nbLus] = 0;
     printf("\t[THREAD %p] Requete recue = %s\n",pthread_self(),requete);
+    pthread_mutex_lock(&mutexDB);
     onContinue = OVESP(requete,reponse,sService, panier, connexion);
+    pthread_mutex_unlock(&mutexDB);
 
 
 
