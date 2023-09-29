@@ -9,7 +9,7 @@
 #include <mysql.h>
 
 
-#define NB_THREADS_POOL 2
+#define NB_THREADS_POOL 1
 #define TAILLE_FILE_ATTENTE 1
 
 struct SocketClient {
@@ -269,6 +269,8 @@ void HandlerSIGINT(int s)
       current = current->next;
       free(temp);
   }
+
+  mysql_close(connexion);
 
   exit(0);
 }

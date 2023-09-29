@@ -16,6 +16,7 @@ extern WindowClient *w;
 int CurrentIdArticle = 0;
 int sClient;
 bool alarmeActivee = false;
+bool logged = false;
 
 #define REPERTOIRE_IMAGES "images/"
 
@@ -194,6 +195,8 @@ void WindowClient::loginOK()
   ui->pushButtonSupprimer->setEnabled(true);
   ui->pushButtonViderPanier->setEnabled(true);
   ui->pushButtonPayer->setEnabled(true);
+
+  logged = true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +224,8 @@ void WindowClient::logoutOK()
 
   w->videTablePanier();
   w->setTotal(-1.0);
+
+  logged = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +298,8 @@ void WindowClient::dialogueErreur(const char* titre,const char* message)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::closeEvent(QCloseEvent *event)
 {
-  on_pushButtonLogout_clicked();
+  if(!logged)
+    on_pushButtonLogout_clicked();
   exit(0);
 }
 
