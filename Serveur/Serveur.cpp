@@ -10,7 +10,7 @@
 
 
 #define NB_THREADS_POOL 1
-#define TAILLE_FILE_ATTENTE 2
+#define TAILLE_FILE_ATTENTE 1
 
 struct SocketClient {
     int socket;
@@ -109,20 +109,21 @@ int main(int argc,char* argv[])
 
     printf("Attente d'une connexion...\n");
 
-    printf("\nAvant NbClientFile = %d\n", nbClientFile);
 
-    while(nbClientFile == TAILLE_FILE_ATTENTE)
+    do
     {
-      printf("File complete... Attente...    %d\n", nbClientFile);
-      pthread_cond_wait(&condFileFull, &mutexNbClientFile);
+      pthread_mutex_unlock(&mutexNbClientFile);
+      if ((sService = Accept(sEcoute,ipClient)) == -1)
+      {
+        perror("Erreur de Accept");
+        close(sEcoute);
+        exit(1);
+      }
+      pthread_mutex_lock(&mutexNbClientFile);
     }
+    while(nbClientFile == TAILLE_FILE_ATTENTE + NB_THREADS_POOL); //enlever requete inutile
 
-    if ((sService = Accept(sEcoute,ipClient)) == -1)
-    {
-      perror("Erreur de Accept");
-      close(sEcoute);
-      exit(1);
-    }
+
 
     if(nbClientFile == NB_THREADS_POOL)
     {
@@ -145,9 +146,6 @@ int main(int argc,char* argv[])
     last->next = (SocketClient *) malloc(sizeof(SocketClient));
     last = last->next;
     nbClientFile++;
-
-    printf("\nNbClientFile = %d\n", nbClientFile);
-
 
     printf("Connexion acceptée : IP=%s socket=%d\n",ipClient,sService);
 
@@ -251,11 +249,6 @@ void TraitementConnexion(int sService)
     {
       close(sService);
       pthread_mutex_lock(&mutexNbClientFile);
-      if(nbClientFile == TAILLE_FILE_ATTENTE)
-      {
-        pthread_cond_signal(&condFileFull);
-        printf("nbClient %d\n", nbClientFile);
-      }
       nbClientFile--;
       pthread_mutex_unlock(&mutexNbClientFile);
     }

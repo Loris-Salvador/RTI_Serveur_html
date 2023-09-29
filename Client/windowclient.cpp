@@ -331,7 +331,7 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   char *ptr = strtok(reponse,"#");
 
-  char etat[6], message[50];
+  char etat[12], message[50];
 
   strcpy(etat,strtok(NULL,"#"));
   strcpy(message,strtok(NULL,"#"));
