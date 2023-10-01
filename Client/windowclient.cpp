@@ -3,7 +3,7 @@
 #include <QMessageBox>
 #include <string>
 #include "../LibSocket/socket.h"
-#include "./Protocole/protocole.h"
+#include "protocole.h"
 #include <signal.h>
 #include <csignal>
 #include <unistd.h>
@@ -318,7 +318,8 @@ void WindowClient::on_pushButtonLogin_clicked()
 
   char requete[200], reponse[200];
 
-  LoginRequestToString(requete, user, password, isNewClient);
+  sprintf(requete, "%s%s%s%s%s%s%d", LOGIN, CS, user, CS, password, CS, isNewClient);
+
 
   char ipServeur[20];
 
@@ -568,16 +569,17 @@ void WindowClient::on_pushButtonPayer_clicked()
   char requete[100];
   char reponse[100];
 
-  strcpy(requete, "CONFIRMER#");
+  strcpy(requete, CONFIRMER);
+  strcat(requete, CS);
   strcat(requete, nom);
 
 
   Send(sClient, requete, strlen(requete));
   Receive(sClient, reponse);
 
-  strtok(reponse,"#");
+  strtok(reponse,CS);
   char OK [5];
-  strcpy(OK, strtok(NULL,"#"));
+  strcpy(OK, strtok(NULL,CS));
 
   if(strcmp(OK, "OK")==0)
   {
