@@ -10,7 +10,7 @@
 
 
 #define NB_THREADS_POOL 1
-#define TAILLE_FILE_ATTENTE 1
+#define TAILLE_FILE_ATTENTE 2
 
 struct SocketClient {
     int socket;
@@ -92,6 +92,7 @@ int main(int argc,char* argv[])
     exit(1);  
   }
 
+  
 
   int sService;
   char ipClient[50];
@@ -125,7 +126,7 @@ int main(int argc,char* argv[])
 
 
 
-    if(nbClientFile == NB_THREADS_POOL)
+    if(nbClientFile >= NB_THREADS_POOL)
     {
         char requete[200];
         int nbEcrits;
@@ -155,14 +156,6 @@ int main(int argc,char* argv[])
     pthread_mutex_unlock(&mutexNbClientFile);
     pthread_cond_signal(&condSocketsAcceptees);
 
-
-    struct timespec temps = {0, 000500000};
-    nanosleep(&temps, NULL);
-    //pour laisser les thread lock le mutex avant de le relock
-
-
-
-
   }
 }
 void* FctThreadClient(void* p)
@@ -176,7 +169,6 @@ void* FctThreadClient(void* p)
 
     while (nbClientFile == 0)
     {
-      printf("Wait\n");
       pthread_cond_wait(&condSocketsAcceptees,&mutexNbClientFile);
 
     }
@@ -184,12 +176,8 @@ void* FctThreadClient(void* p)
 
 
     SocketClient* previous = current;
-
-
     sService = current->socket;
     current = current->next;
-
-
     free(previous);
 
     
@@ -231,6 +219,8 @@ void TraitementConnexion(int sService)
 
     requete[nbLus] = 0;
     printf("\t[THREAD %p] Requete recue = %s\n",pthread_self(),requete);
+
+
     pthread_mutex_lock(&mutexDB);
     onContinue = OVESP(requete,reponse,sService, panier, connexion);
     pthread_mutex_unlock(&mutexDB);
@@ -270,7 +260,9 @@ void HandlerSIGINT(int s)
       free(temp);
   }
 
+  pthread_mutex_lock(&mutexDB);
   mysql_close(connexion);
+  pthread_mutex_unlock(&mutexDB);
 
   exit(0);
 }

@@ -23,7 +23,7 @@ bool OVESP_Cancel(int idArticle, MYSQL* connexion);
 
 void OVESP_CancelAll();
 
-int OVESP_Confirmer();
+void OVESP_Confirmer(MYSQL*, char*);
 
 void OVESP_Logout();
 
@@ -35,7 +35,6 @@ ARTICLE ** caddie;
 //***** Parsing de la requete et creation de la reponse *************
 bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* connexion)
 {
-
     MYSQL_ROW ligne;
     char requete_sql[200];
     MYSQL_RES  *resultat;
@@ -252,6 +251,27 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
         sprintf(reponse,"CANCEL ALL#OK");
     }
 
+    //************* CONFIRMER ALL **********************************
+    else if(strcmp(ptr, "CONFIRMER") == 0)
+    {
+
+        printf("\t[THREAD %p] CONFIRMER\n",pthread_self());
+
+        char user[30];
+
+        strcpy(user,strtok(NULL,"#"));
+
+
+        OVESP_Confirmer(connexion, user);
+
+        sprintf(reponse, "CONFIRMER#OK");
+
+
+
+        
+
+    }
+
     return true;
 }
 
@@ -401,11 +421,113 @@ void add_Client_In_BD(char* user, char* password, MYSQL* connexion)
 {
     char requete_sql[200];
 
-    sprintf(requete_sql, "INSERT INTO USER VALUES ('%s', '%s')", user, password);
+    sprintf(requete_sql, "INSERT INTO USER (USERNAME, PASSWORD) VALUES ('%s', '%s')", user, password);
 
         
     if(mysql_query(connexion,requete_sql) != 0)
     {
         fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
     }
+}
+
+void OVESP_Confirmer(MYSQL* connexion, char* user)
+{
+    MYSQL_ROW ligne;
+    MYSQL_ROW row;
+    char requete_sql[200];
+    MYSQL_RES  *resultat;
+
+    int idClient = -1, idFacture = -1;
+    float montant = 0;
+
+    sprintf(requete_sql, "SELECT * FROM USER WHERE USERNAME LIKE '%s'", user);
+
+
+
+
+    if(mysql_query(connexion,requete_sql) != 0)
+    {
+        fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+        exit(1);
+    }
+
+
+    if((resultat = mysql_store_result(connexion))==NULL)
+    {
+        fprintf(stderr, "Erreur de mysql_store_result: %s\n",mysql_error(connexion));
+        exit(1);
+    }
+
+    ligne = mysql_fetch_row(resultat);
+
+    idClient = atoi(ligne[0]);
+
+    
+    for(int i=0; caddie[i] != NULL; i++)
+    {
+        montant = montant + caddie[i]->prix * caddie[i]->stock;
+    }
+
+
+    sprintf(requete_sql, "INSERT INTO FACTURE (ID_CLIENT, MONTANT) VALUES (%d, %f)", idClient, montant);
+
+
+
+
+    if(mysql_query(connexion,requete_sql) != 0)
+    {
+        fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+        exit(1);
+    }
+
+        if (mysql_query(connexion, "SELECT ID FROM FACTURE ORDER BY ID DESC LIMIT 1") != 0) {
+        fprintf(stderr, "Erreur lors de la récupération de la colonne : %s\n", mysql_error(connexion));
+        mysql_close(connexion);
+        exit(1);
+    }
+
+
+    resultat = mysql_store_result(connexion);
+    if (resultat) {
+        row = mysql_fetch_row(resultat);
+        idFacture = atoi(row[0]);
+        
+    }
+
+    printf("idFacture = %d\n", idFacture);
+
+
+
+
+
+
+
+
+
+
+    while(caddie[0] != NULL)
+    {
+
+        sprintf(requete_sql, "INSERT INTO ARTICLE_FACTURE VALUES (%d, %d, %d)",idFacture , caddie[0]->id, caddie[0]->stock);
+
+
+        if(mysql_query(connexion,requete_sql) != 0)
+        {
+            fprintf(stderr, "Erreur de mysql_query: %s\n",mysql_error(connexion));
+            exit(1);
+        }
+        
+
+
+
+        //decale
+        free(caddie[0]);
+
+        int j;
+        for(j = 0 ; j<9 && caddie[j+1] != NULL ; j++)
+            caddie[j] = caddie[j+1];
+
+        caddie[j] = NULL;
+    }
+    
 }

@@ -24,6 +24,7 @@ public:
     void setImage(const char *image);
     int isNouveauClientChecked();
     int getQuantite();
+    int getTotal();
     void loginOK();
     void logoutOK();
     void setArticle(const char *intitule, float prix, int stock, const char *image);

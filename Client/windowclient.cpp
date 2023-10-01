@@ -179,6 +179,7 @@ void WindowClient::setTotal(float total)
   else ui->lineEditTotal->clear();
 }
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::loginOK()
 {
@@ -298,7 +299,7 @@ void WindowClient::dialogueErreur(const char* titre,const char* message)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::closeEvent(QCloseEvent *event)
 {
-  if(!logged)
+  if(logged)
     on_pushButtonLogout_clicked();
   exit(0);
 }
@@ -560,6 +561,31 @@ void WindowClient::on_pushButtonViderPanier_clicked()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void WindowClient::on_pushButtonPayer_clicked()
 {
+  char nom[30];
+
+  strcpy(nom, getNom());
+
+  char requete[100];
+  char reponse[100];
+
+  strcpy(requete, "CONFIRMER#");
+  strcat(requete, nom);
+
+
+  Send(sClient, requete, strlen(requete));
+  Receive(sClient, reponse);
+
+  strtok(reponse,"#");
+  char OK [5];
+  strcpy(OK, strtok(NULL,"#"));
+
+  if(strcmp(OK, "OK")==0)
+  {
+    videTablePanier();
+    dialogueMessage("SUCCESS", "Achat reussi !");
+  }
+
+
 
 }
 
@@ -664,6 +690,5 @@ void HandlerSIGALRM(int sig)
   printf("Alarme\n");
   close(sClient);
   alarmeActivee = true;
-
 }
 
