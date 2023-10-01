@@ -76,13 +76,7 @@ int main(int argc,char* argv[])
     exit(1);
   }
 
-  printf("Création du pool de threads.\n");
-  pthread_t th[NB_THREADS_POOL];
-
-  for (int i=0 ; i<NB_THREADS_POOL ; i++)
-    pthread_create(&th[i],NULL,FctThreadClient,NULL);
-
-
+  
   //CONNEXION DB
 
   connexion = mysql_init(NULL);
@@ -91,6 +85,14 @@ int main(int argc,char* argv[])
     fprintf(stderr,"(SERVEUR) Erreur de connexion à la base de données...\n");
     exit(1);  
   }
+
+
+  printf("Création du pool de threads.\n");
+  pthread_t th[NB_THREADS_POOL];
+
+  for (int i=0 ; i<NB_THREADS_POOL ; i++)
+    pthread_create(&th[i],NULL,FctThreadClient,NULL);
+
 
   
 
