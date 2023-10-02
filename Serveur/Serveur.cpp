@@ -10,7 +10,7 @@
 
 
 #define NB_THREADS_POOL 1
-#define TAILLE_FILE_ATTENTE 2
+#define TAILLE_FILE_ATTENTE 1
 
 struct SocketClient {
     int socket;

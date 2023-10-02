@@ -584,6 +584,7 @@ void WindowClient::on_pushButtonPayer_clicked()
   if(strcmp(OK, "OK")==0)
   {
     videTablePanier();
+    setTotal(-1);
     dialogueMessage("SUCCESS", "Achat reussi !");
   }
 

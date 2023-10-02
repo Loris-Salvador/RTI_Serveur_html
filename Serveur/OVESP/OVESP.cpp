@@ -151,7 +151,9 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
         int idArticle = atoi(strtok(NULL,"#"));
 
         int j;
-        for(j=0; caddie[j] != NULL; j++);
+        for(j=0; caddie[j] != NULL && caddie[j]->id != idArticle; j++);
+
+
 
         if(j == 10)
         {
@@ -178,21 +180,30 @@ bool OVESP(char* requete, char* reponse,int socket, ARTICLE** cadd, MYSQL* conne
 
                 sprintf(reponse,"ACHAT#%s#%d#%s#%s",ligne[0],quantite,ligne[1],ligne[2]);
 
-                ARTICLE art;
-
-                art.id = atoi(ligne[0]);
-                strcpy(art.intitule, ligne[1]);
-                art.stock = quantite;
-                strcpy(art.image, ligne[4]);
-                art.prix = atof(ligne[2]);
-
-                int i;
-                for (i = 0; caddie[i] != NULL && i<10; i++);
-
-                if(caddie[i] == NULL && i<10)//Vérification inutile mais on sait jamais
+                if(caddie[j] != NULL && caddie[j]->id == idArticle)
                 {
-                    caddie[i] = (ARTICLE *)malloc(sizeof(ARTICLE));
-                    *caddie[i] = art;
+                    caddie[j]->stock = caddie[j]->stock + quantite;
+                }
+                else
+                {
+
+
+                    ARTICLE art;
+
+                    art.id = atoi(ligne[0]);
+                    strcpy(art.intitule, ligne[1]);
+                    art.stock = quantite;
+                    strcpy(art.image, ligne[4]);
+                    art.prix = atof(ligne[2]);
+
+                    int i;
+                    for (i = 0; caddie[i] != NULL && i<10; i++);
+
+                    if(caddie[i] == NULL && i<10)//Vérification inutile mais on sait jamais
+                    {
+                        caddie[i] = (ARTICLE *)malloc(sizeof(ARTICLE));
+                        *caddie[i] = art;
+                    }
                 }
 
             }
