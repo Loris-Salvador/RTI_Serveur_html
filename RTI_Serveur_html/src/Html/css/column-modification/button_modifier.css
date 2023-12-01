@@ -1,0 +1,25 @@
+#button_modifier{
+    font-family: "Kristen ITC", sans-serif;
+    text-align: center;
+    font-size: 30px;
+    color: rgb(255, 255, 255);
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+
+    position: absolute;
+    margin-top: 270px;
+    margin-left: 50px;
+
+    width: 212px;
+    height: 75px;
+    cursor: pointer;
+
+    background-image: url("../../../../image/image_design/Bois_grise.png");
+    background-color: transparent;
+    border: none;
+}
+
+#button_modifier:hover{
+    background-image: url("../../../../image/image_design/Bois_Mod_Hover.png");
+    color: gold;
+}

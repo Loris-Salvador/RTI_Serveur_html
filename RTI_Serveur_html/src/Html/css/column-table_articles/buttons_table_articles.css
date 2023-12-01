@@ -1,0 +1,39 @@
+.buttons_table_articles{
+    display: grid;
+    grid-template-rows: 55px 55px;
+}
+
+#button_ajouter, #button_supprimer{
+    font-family: "Kristen ITC", sans-serif;
+    text-align: center;
+    font-size: 30px;
+    color: gold;
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+
+    margin-top: 10px;
+    margin-left: 10px;
+
+    width: 45px; /* Définissez la largeur souhaitée */
+    height: 45px; /* Définissez la hauteur souhaitée */
+    background-size: 45px 45px; /* Ajustez la taille de l'image de fond */
+
+    cursor: pointer;
+
+    background-color: transparent;
+    border: none;
+}
+
+#button_ajouter{
+    background-image: url("../../../../image/image_design/Bois_Add.png");
+}
+
+#button_supprimer{
+    background-image: url("../../../../image/image_design/Bois_Del.png");
+}
+
+#button_supprimer:hover, #button_ajouter:hover{
+    background-image: url("../../../../image/image_design/Bois_grise.png");
+    color: white;
+}
+

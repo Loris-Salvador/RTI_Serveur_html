@@ -1,0 +1,4 @@
+.column-table_articles{
+    display: grid;
+    grid-template-columns: auto auto;
+}

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maraîcher en Ligne</title>
+    <link rel="icon" href="image/image_design/Logo.png" type="image/png">
+
+    <link rel="stylesheet" href="css/index.css">
+
+    <link rel="stylesheet" href="css/column-table_articles/column-table_articles.css">
+    <link rel="stylesheet" href="css/column-table_articles/table_articles.css">
+    <link rel="stylesheet" href="css/column-table_articles/buttons_table_articles.css">
+
+    <link rel="stylesheet" href="css/column-box_article/column-box_article.css">
+
+    <link rel="stylesheet" href="css/column-modification/column-modification.css">
+    <link rel="stylesheet" href="css/column-modification/prix.css">
+    <link rel="stylesheet" href="css/column-modification/quantite.css">
+    <link rel="stylesheet" href="css/column-modification/button_modifier.css">
+
+    <link rel="stylesheet" href="css/Dialog/dialog.css">
+    <link rel="stylesheet" href="css/Dialog/grid.css">
+    <link rel="stylesheet" href="css/Dialog/dialog_buttons.css">
+    <link rel="stylesheet" href="css/Dialog/dialog_image.css">
+
+  </head>
+  <body>
+    <div class="row-title">
+      <h1 class="title">Le Maraîcher en Ligne</h1>
+    </div>
+
+    <div class="row-body">
+
+      <div class="column-table_articles">
+        <table class="table_articles">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Quantité</th>
+          </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="buttons_table_articles">
+          <button id="button_ajouter" onclick="ouvrirBoiteDialogue()">+</button>
+          <button id="button_supprimer" onclick="Supprimer()">-</button>
+        </div>
+
+      </div>
+
+      <div class="column-box_article">
+        <img id="img_box_article" src="../../image/image_design/Box.png" alt="Not found">
+        <img id="img_article" alt="Description de l'image">
+        <p id="titre_box_article"></p>
+      </div>
+
+      <div class="column-modification">
+        <p id="titre_column_modification">Modifier:</p>
+
+        <img id="img_bois_prix" src="../../image/image_design/Bois.png" alt="Not found">
+        <p id="prix_article">Prix:</p>
+        <input type="text" id="champ_prix" name="cham_prix">
+
+        <img id="img_bois_quantite" src="../../image/image_design/Bois.png" alt="Not found">
+        <p id="quantite_article">Quantité:</p>
+        <input type="text" id="champ_quantite" name="cham_quantite">
+
+        <button id="button_modifier" onclick="Modifier()">Modifier</button>
+      </div>
+    </div>
+
+
+    <div id="boiteDialogue" class="modal">
+      <h1 id="titre_dialog">Ajouter</h1>
+      <div class="dialog_grid">
+        <p id="dialog_id">Id:</p>
+        <p id="dialog_champ_id"></p>
+        <p id="dialog_nom">Nom:</p>
+        <input type="text" id="dialog_champ_nom" name="dialog_cham_nom">
+        <p id="dialog_prix">Prix:</p>
+        <input type="text" id="dialog_champ_prix" name="dialog_cham_prix">
+        <p id="dialog_quantite">Quantité:</p>
+        <input type="text" id="dialog_champ_quantite" name="dialog_cham_quantite">
+        <p id="dialog_image">Image:</p>
+
+        <div class="dialog_image">
+          <label for="files" class="Selecteur_img" id="label_selecteur">Select Image</label>
+          <input id="files" style="visibility:hidden;" type="file" accept="image/*" onchange="afficherNomImage()">
+        </div>
+
+
+        <button id="button_annuler" onclick="fermerBoiteDialogue()">Annuler</button>
+        <button id="button_confirmer" onclick="Confirmer()">Confirmer</button>
+      </div>
+    </div>
+
+    <script src="javascript/script.js"></script>
+    <script src="javascript/dialog.js"></script>
+    <script src="javascript/dialog_image.js"></script>
+  </body>
+</html>
+

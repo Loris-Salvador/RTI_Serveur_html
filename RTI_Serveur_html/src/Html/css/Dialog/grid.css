@@ -1,0 +1,55 @@
+.dialog_grid{
+    margin-top: -35px;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: 60px 60px 60px 60px 60px auto;
+    text-align: left;
+}
+
+
+#dialog_id, #dialog_nom, #dialog_prix, #dialog_quantite, #dialog_image{
+    margin-left: 80px;
+
+    font-size: 25px;
+    color: gold;
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+}
+
+#dialog_champ_id, #dialog_champ_nom, #dialog_champ_prix, #dialog_champ_quantite{
+    margin-top: 20px;
+
+    height: 37px; /* Définissez la hauteur souhaitée */
+
+
+    font-family: "Kristen ITC", sans-serif;
+    text-align: center;
+    font-size: 25px;
+    color: gold;
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+    background-color: #fff9eb; /* Enlève le fond */
+    border: black;
+    position: relative;
+
+    caret-color: black;
+}
+
+#dialog_champ_nom{
+    width: 200px; /* Définissez la largeur souhaitée */
+    margin-left: -50px;
+}
+
+#dialog_champ_prix{
+    width: 75px; /* Définissez la largeur souhaitée */
+    margin-left: 75px;
+}
+#dialog_champ_quantite{
+    width: 50px; /* Définissez la largeur souhaitée */
+    margin-left: 100px;
+}
+#dialog_champ_id{
+    width: 50px; /* Définissez la largeur souhaitée */
+    margin-left: 100px;
+    background-color: transparent;
+}

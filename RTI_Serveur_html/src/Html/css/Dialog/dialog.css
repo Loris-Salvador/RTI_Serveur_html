@@ -1,0 +1,30 @@
+.modal {
+    position: fixed;
+    z-index: 1;
+    left: 400px;
+    top: 100px;
+    width: 464px;
+    height: 538px;
+    overflow: auto;
+    background-image: url("../../../../image/image_design/dialog.png");
+    background-color: transparent;
+    border: none;
+
+    align-content: center;
+    text-align: center;
+
+    display: none;
+}
+
+#titre_dialog{
+    margin-top: 105px;
+    align-content: center;
+    font-size: 50px;
+    color: gold;
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+}
+
+#boiteDialogue {
+    overflow: hidden;
+}

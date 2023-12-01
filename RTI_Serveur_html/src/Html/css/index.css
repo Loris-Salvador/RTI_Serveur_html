@@ -1,0 +1,33 @@
+body {
+    font-family: "Kristen ITC", sans-serif;
+    display: grid;
+    grid-template-rows: auto auto;
+    justify-content: center;
+    align-items: flex-start;
+    max-height: 100vh;
+    background-image: url('../../../image/image_design/Fond.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    cursor: default;
+    overflow: hidden;
+}
+
+.title {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 5em;
+    color: #75e73c;
+    text-shadow: 2px 0 0 black, 0 2px 0 black, 0 -2px 0 black, -2px 0 0 black, 2px 2px 0 black, 2px -2px 0 black, -2px 2px 0 black, -2px -2px 0 black;
+    font-weight: 900;
+}
+
+.row-body{
+    display: grid;
+    grid-template-columns: auto 500px 300px;
+}
+
+
+
+
+

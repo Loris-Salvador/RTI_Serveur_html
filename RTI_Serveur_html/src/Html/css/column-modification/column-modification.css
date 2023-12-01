@@ -1,0 +1,16 @@
+.column-modification{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+#titre_column_modification{
+    position: absolute;
+    margin-top: -220px;
+    margin-left: 30px;
+
+    font-size: 50px;
+    color: gold;
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900;
+}

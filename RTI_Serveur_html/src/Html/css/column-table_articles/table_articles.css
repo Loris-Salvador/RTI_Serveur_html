@@ -1,0 +1,59 @@
+.table_articles {
+    font-family: "Kristen ITC", sans-serif;
+    border-collapse: collapse;
+    align-self: flex-start;
+}
+
+.table_articles thead,
+.table_articles tbody {
+    display: block;
+    max-height: 370px;
+    overflow-y: auto;
+}
+
+.table_articles th, .table_articles td {/*Text Table*/
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900; /* Rend le texte plus gras (plus épais) */
+    padding: 12px 15px;
+    text-align: center;
+}
+
+.table_articles thead tr { /*Line Header*/
+    color: #DCFFDC;
+    background: linear-gradient(170deg, rgb(50, 155, 50), rgb(0, 128, 0));
+}
+
+.table_articles tbody tr { /*Line Body*/
+    color: gold;
+    background: linear-gradient(170deg, #e1ffb5, #ccff00);
+}
+
+.table_articles tbody tr:hover { /*On Line Body*/
+    background: linear-gradient(170deg, rgb(180, 255, 180), rgb(77, 225, 77));
+    cursor: pointer;
+}
+
+.table_articles tbody tr.clicked {
+    background: linear-gradient(170deg, rgb(150, 255, 150), rgb(47, 195, 47));
+}
+
+
+.table_articles th:nth-child(1),
+.table_articles td:nth-child(1) {
+    width: 60px;
+}
+
+.table_articles th:nth-child(2),
+.table_articles td:nth-child(2) {
+    width: 100px;
+}
+
+.table_articles th:nth-child(3),
+.table_articles td:nth-child(3) {
+    width: 100px;
+}
+
+.table_articles th:nth-child(4),
+.table_articles td:nth-child(4) {
+    width: 100px;
+}

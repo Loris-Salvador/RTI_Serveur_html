@@ -1,0 +1,26 @@
+.column-box_article {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#img_box_article{
+    position: absolute;
+}
+
+#img_article {
+    position: absolute;
+    margin-top: 130px;
+    margin-left: 5px;
+}
+
+#titre_box_article {
+    margin-left: 5px;
+    margin-top: -165px;
+    position: absolute;
+    font-family: "Kristen ITC", sans-serif;
+    font-size: 30px; /* Taille de la police en pixels */
+    color: #ffd700; /* Couleur "bois" */
+    text-shadow: 1px 0 0 black, 0 1px 0 black, 0 -1px 0 black, -1px 0 0 black, 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
+    font-weight: 900; /* Rend le texte plus gras (plus épais) */
+}
