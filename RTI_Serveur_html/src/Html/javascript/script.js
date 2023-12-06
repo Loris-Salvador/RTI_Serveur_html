@@ -83,7 +83,7 @@ function refreshTable(){
     xhr.send();
 }
 
-refreshTable();
+
 
 
 function Modifier() {
@@ -160,3 +160,6 @@ function Supprimer(){
     // Convertir l'objet JSON en chaîne JSON et l'envoyer dans le corps de la requête
     xhr.send();
 }
+
+
+refreshTable();
